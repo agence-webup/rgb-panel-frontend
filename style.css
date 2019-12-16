@@ -1,0 +1,125 @@
+#panel {
+    display: flex;
+    align-content: flex-start;
+    filter: drop-shadow(0 0 0.75rem rgba(0, 0, 0, 0.5));
+    /*user-select: none;*/
+}
+
+#pencil, #eraser, #panel {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.toolSelected {
+    border: 2px solid #34486A;
+}
+
+#tools {
+    box-sizing: border-box;
+    height: 180px;
+    width: 60px;
+    border: 1px solid rgba(89, 98, 112, 0.37);
+    background-color: #E5E6E8;
+}
+
+#tools > * {
+    display: block;
+    text-align: center;
+    margin-left: 25%;
+    width: 25px;
+    margin-top: 20px;
+    /*border: 2px solid rgba(0, 0, 0, 0);*/
+}
+
+#color {
+    width: 25px;
+    height: 25px;
+    background-color: #00F;
+}
+
+#colorInput {
+    display: none;
+}
+
+#thickness-panel {
+    display: none;
+    margin-left: 50px;
+    width: 120px;
+    text-align: center;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+#thickness {
+    width: 125px;
+}
+
+.pixelBorder {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 13px;
+    width: 13px;
+    border: 1px solid #646464;
+    background-color: #5A5A5A;
+}
+
+.pixel {
+    width: 50%;
+    height: 50%;
+    background-color: #BABABA;
+}
+
+
+a {
+    position: relative;
+    /*background: white;
+    border: solid 3px #aaa;*/
+    cursor: pointer;
+    font-size: 20px;
+    display: inline-block;
+    margin: 5px;
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 39px;
+  }
+  a::after{
+   content: '';
+   position: absolute;
+    height: 100%;
+    width: 20px;
+    top: 0;
+    right: -15px;
+  }
+  a:hover span {
+    display: inline-block;
+  }
+  a span {
+    position: absolute;
+    right: calc(-150px - 20px);
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    background: white;
+    border: solid 2px #bbb;
+    width: 150px;
+    display: none;
+  }
+  a span::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: calc(50% - 5px);
+    width: 0;
+    height: 0;
+    border-right: 5px solid #bbb;
+    border-bottom: 5px solid transparent;
+    border-top: 5px solid transparent;
+  }

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas test thingy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <p>Webup RGB (canvas implementation)</p>
+    <div id="tools">
+        <a>
+            <img src="img/pencil.svg" alt="pencil" id="pencil">
+            <span>
+                <input type="range" id="thickness" min="1" max="3" step="1">
+            </span>
+        </a>
+        <a>
+            <img src="img/eraser.svg" alt="eraser" id="eraser">
+        </a>
+        <input type="color" id="colorInput" value="#00F" hidden>
+        <span id="color"></span>
+        <!--<div id="pencil-wrapper">
+            <img src="img/pencil.svg" alt="pencil" id="pencil">
+            <span id="thickness-panel">
+                
+            </span>
+        </div>
+        <img src="img/eraser.svg" id="eraser" alt="eraser">
+        -->
+    </div>
+    <canvas id="panel" width="832" height="416"></canvas>
+    <noscript>L'activation de JavaScript est requise pour pouvoir afficher ce contenu</noscript>
+    <input type="text" id="message">
+    <button onclick="send()">
+        Envoyer
+    </button>
+    <script defer>
+            var canvas = document.getElementById('panel')
+            var messageBox = document.getElementById('message')
+            var colorInput = document.getElementById('colorInput')
+            var colorPreview = document.getElementById('color')
+            let pencilButton = document.getElementById('pencil')
+            let eraserButton = document.getElementById('eraser')
+            let thicknessControl = document.getElementById('thickness')
+    
+            let matrix = []
+            const height = 32
+            const width = 64
+            
+            let matrixCol = []
+            let canvasDrawn = false
+
+            init();
+            
+            // Drawing parameters
+            /*
+                modes:
+                    0 - erase mode
+                    1 - draw mode
+            */
+            let mode = 1
+    
+            /*
+                thickness:
+                    <1|2|4|8>
+            */
+            let thickness = 1
+    
+            /* 
+                input color:
+                    <hex value>
+            */
+            let color = "#00F";
+    
+            /*
+                mouseDown:
+                    boolean
+            */
+            let mouseDown = false
+
+            /*
+                visibility of thickness panel:
+                    boolean
+            */
+            let thicknessPanelVisible = false
+    
+            function init() {
+                // reset matrix just in case
+                matrix = []
+
+                // create columns
+                for(i=0; i < height; i++) {
+                    matrixCol.push("#000")
+                }
+    
+                // create columns
+                for (i=0; i < width; i++) {
+                    matrix.push(matrixCol)
+                }
+
+                messageBox.value = null
+                drawCanvas()
+
+                pencilButton.classList.add("toolSelected")
+            }
+
+            function drawCanvas() {
+
+                if (canvas.getContext) {
+                    var ctx = canvas.getContext('2d')
+                    ctx.imageSmoothingEnabled = false
+                    ctx.lineWidth = 1
+    
+                    // start with x = y = 0
+                    // these are used as coordinates for drawing each "pixel"
+                    let x = 0
+                    let y = 0
+    
+                    // start with x2 = y2 = 4
+                    // as x and y above, but for the inner square, which actually displays the color
+                    let x2 = 4
+                    let y2 = 4
+    
+                    // loop through rows and draw them
+                    for(i=0; i < matrix.length; i++) {
+    
+                        // loop again through items in row, draw them
+                        for(j=0; j < matrix[i].length; j++) {
+    
+                            ctx.strokeStyle = '#646464'
+                            ctx.strokeRect(x, y, 13, 13)
+                            ctx.fillStyle = '#5A5A5A'
+                            ctx.fillRect(x+1, y+1, 12, 12)
+                            ctx.fillStyle = (matrix[i][j] == "#000" ? '#BABABA' : matrix[i][j])
+                            ctx.fillRect(x2, y2, 5.5, 5.5)
+                            
+                            // bump up x coordinates for next iteration
+                            y += 13
+                            y2 += 13   
+                        }
+                    
+                        // reinitialize coordinates for next line
+                        x += 13
+                        y = 0
+    
+                        x2 += 13
+                        y2 = 4
+                    }
+                }
+            }
+    
+            canvas.addEventListener("mousedown", () => {
+                mouseDown = true
+            })
+    
+            canvas.addEventListener("mouseup", () => {
+                mouseDown = false
+            })
+    
+            canvas.addEventListener("mousemove", (e) => {
+                if (mouseDown == true) {
+                    let mouseX = e.pageX - canvas.offsetLeft
+                    let mouseY = e.pageY - canvas.offsetTop
+                    //console.log("mouseMove", "x:", mouseX, "y:", mouseY)
+                    drawOnCanvas(x = mouseX, y = mouseY, color = color)
+                }
+            })
+
+            colorPreview.addEventListener("click", function() {
+                colorInput.focus();
+                colorInput.value = color;
+                colorInput.click();
+            });
+
+            colorInput.addEventListener("change", function() {
+                // Immediately set mode to draw when color is picked
+                mode = 1
+                color = colorInput.value
+                colorPreview.style.backgroundColor = color
+            })
+
+            thicknessControl.addEventListener("change", function() {
+                let chosenThickness = thicknessControl.value
+
+                // Because `<input type="range">` can't be set to have the exact scale we want, lo and behold: clunky code below
+                switch (chosenThickness) {
+                    case "1": // single dot
+                        thickness = 1
+                        break;
+                
+                    case "2": // cross (technically 3x3)
+                        thickness = 2
+                        break;
+
+                    case "3": // technically a 3x3 square
+                        thickness = 3
+                        break;
+                }
+            })
+    
+            function drawOnCanvas(x, y, color) {
+                // figure out which pixel in the matrix should be changed
+                // this shouldn't be too difficult given the fact that each square drawn on the canvas is
+                // mapped as 1:1 to a "pixel" in the matrix that controls the canvas-drawn matrix
+
+                // each square on the canvas is 13x13 pixels, so we can perform a floor division on the coordinate to get its position in the matrix
+                
+                let pixelX = Math.abs(Math.floor(x/13))
+                let pixelY = Math.abs(Math.floor(y/13))
+    
+                let newMatrix = []
+
+                for (i=0; i < matrix.length; i++) {
+                    // there's some heavy use of JSON.stringify() and JSON.parse() here because we need to actually make copies of each variable
+                    // rather than passing a reference, in order to counteract JavaScript's default behavior
+                    let tempArray = []
+                    tempArray = JSON.parse(JSON.stringify(matrix[i]))
+
+                    if (i == pixelX) {
+                        if (mode == 1) {
+                            tempArray[pixelY] = color
+                        }
+                        if (mode == 0) {
+                            tempArray[pixelY] = '#000'
+                        }
+                    }
+
+                    newMatrix.push(JSON.parse(JSON.stringify(tempArray)))
+                }
+                
+                matrix = newMatrix
+
+                // redraw new point on the panel
+                var ctx = canvas.getContext('2d')
+                ctx.imageSmoothingEnabled = false
+                ctx.fillStyle = (matrix[pixelX][pixelY] == "#000" ? '#BABABA' : matrix[pixelX][pixelY])
+                ctx.fillRect((pixelX*13)+4, (pixelY*13)+4, 5.5, 5.5)
+            }
+
+            // function setColor() {
+                
+            //     mode = 1
+            //     color = document.getElementById("color").value
+            // }
+
+            
+            pencilButton.onclick = (event) => {
+                if (mode != 1) {
+                    mode = 1
+                    if (eraserButton.classList.contains("toolSelected")) {
+                        eraserButton.classList.remove("toolSelected")
+                    }
+                    pencilButton.classList.add("toolSelected")
+                }
+            }
+
+            eraserButton.onclick = (event) => {
+                if (mode != 0) {
+                    mode = 0
+                    if (pencilButton.classList.contains("toolSelected")) {
+                        pencilButton.classList.remove("toolSelected")
+                    }
+                    eraserButton.classList.add("toolSelected")
+                }
+            }
+
+            function sendDrawing() {
+                let drawing = []
+                for(i=0; i < matrix.length; i++) {
+                    
+                    for(j=0; j < matrix[i].length; j++) {
+
+                        if (matrix[i][j] != '#000') {
+                            let rgb = hexToRgb(matrix[i][j])
+                            drawing.push({ // using the + operand in order to make sure integers are being passed into the object
+                                "x": +i,
+                                "y": +j,
+                                "r": +rgb.r,
+                                "g": +rgb.g,
+                                "b": +rgb.b
+                            })
+                        }
+                    }
+                        
+                }
+
+                let drawingJson = {
+                    "drawing": drawing
+                }
+
+                let req = new XMLHttpRequest()
+                req.addEventListener("load", sendComplete)
+                req.addEventListener("error", sendError)
+                req.open("POST", "http://localhost:3000/send/drawing")
+                req.setRequestHeader('Content-Type', 'application/json')
+                req.send(JSON.stringify(drawingJson))
+            }
+
+            function sendMessage() {
+                let msg = messageBox.value
+
+                let msgJson = {
+                    "text": msg
+                }
+
+                let req = new XMLHttpRequest()
+                req.addEventListener("load", sendComplete)
+                req.addEventListener("error", sendError)
+                req.open("POST", "http://localhost:3000/send/message")
+                req.setRequestHeader('Content-Type', 'application/json')
+                req.send(JSON.stringify(msgJson))
+            }
+    
+            function hexToRgb(hex) {
+                // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+                var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+                hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                    return r + r + g + g + b + b;
+                });
+    
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? {
+                        r: parseInt(result[1], 16),
+                        g: parseInt(result[2], 16),
+                        b: parseInt(result[3], 16)
+                } : null;
+            }
+
+            function sendComplete() {
+                init()
+            }
+
+            function sendError() {
+                alert("Une erreur est survenue")
+            }
+
+            function send() {
+                if(messageBox.value.length > 0) {
+                    sendMessage()
+                }
+                else {
+                    sendDrawing()
+                }
+            }
+        </script>
+</body>
+</html>
