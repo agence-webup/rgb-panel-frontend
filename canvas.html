@@ -63,7 +63,7 @@
     
             /*
                 thickness:
-                    <1|2|4|8>
+                    <1|2|3>
             */
             let thickness = 1
     
@@ -199,16 +199,94 @@
                 }
             })
     
+            // function drawOnCanvas(x, y, color) {
+            //     // figure out which pixel in the matrix should be changed
+            //     // this shouldn't be too difficult given the fact that each square drawn on the canvas is
+            //     // mapped as 1:1 to a "pixel" in the matrix that controls the canvas-drawn matrix
+
+            //     // each square on the canvas is 13x13 pixels, so we can perform a floor division on the coordinate to get its position in the matrix
+                
+            //     let pixelX = Math.abs(Math.floor(x/13))
+            //     let pixelY = Math.abs(Math.floor(y/13))
+    
+            //     let newMatrix = []
+
+            //     for (i=0; i < matrix.length; i++) {
+            //         // there's some heavy use of JSON.stringify() and JSON.parse() here because we need to actually make copies of each variable
+            //         // rather than passing a reference, in order to counteract JavaScript's default behavior
+            //         let tempArray = []
+            //         tempArray = JSON.parse(JSON.stringify(matrix[i]))
+
+            //         if (i == pixelX) {
+            //             if (mode == 1) {
+            //                 tempArray[pixelY] = color
+            //             }
+            //             if (mode == 0) {
+            //                 tempArray[pixelY] = '#000'
+            //             }
+            //         }
+
+            //         newMatrix.push(JSON.parse(JSON.stringify(tempArray)))
+            //     }
+                
+            //     matrix = newMatrix
+
+            //     // redraw new point on the panel
+            //     var ctx = canvas.getContext('2d')
+            //     ctx.imageSmoothingEnabled = false
+            //     ctx.fillStyle = (matrix[pixelX][pixelY] == "#000" ? '#BABABA' : matrix[pixelX][pixelY])
+            //     ctx.fillRect((pixelX*13)+4, (pixelY*13)+4, 5.5, 5.5)
+            // }
+
             function drawOnCanvas(x, y, color) {
                 // figure out which pixel in the matrix should be changed
                 // this shouldn't be too difficult given the fact that each square drawn on the canvas is
                 // mapped as 1:1 to a "pixel" in the matrix that controls the canvas-drawn matrix
 
                 // each square on the canvas is 13x13 pixels, so we can perform a floor division on the coordinate to get its position in the matrix
-                
+
                 let pixelX = Math.abs(Math.floor(x/13))
                 let pixelY = Math.abs(Math.floor(y/13))
-    
+                
+                let xCoords = []
+                let yCoords = []
+
+                // add single point
+                xCoords.push(pixelX)
+                yCoords.push(pixelY)
+
+                if (thickness > 1) {
+
+                    // produces a shape like this: 
+                    // 11
+                    // 11
+                    
+                    if (pixelY - 1 >= 0) {
+                        yCoords.push(pixelY - 1)
+                    }
+                    if (pixelX + 1 <= width - 1) {
+                        xCoords.push(pixelX + 1)
+                    }
+                    
+                }
+
+                if (thickness > 2) {
+
+                    // produces a shape like this:
+                    // 111
+                    // 111
+                    // 111
+
+                    if (pixelX - 1 >= 0) {
+                        xCoords.push(pixelX - 1)  
+                    }
+
+                    if (pixelY + 1 <= width - 1) {
+                        yCoords.push(pixelY + 1)
+                    }
+                }
+
+
                 let newMatrix = []
 
                 for (i=0; i < matrix.length; i++) {
@@ -217,9 +295,12 @@
                     let tempArray = []
                     tempArray = JSON.parse(JSON.stringify(matrix[i]))
 
-                    if (i == pixelX) {
+                    if (xCoords.includes(i)) {
                         if (mode == 1) {
-                            tempArray[pixelY] = color
+                            for (j=0; j < yCoords.length; j++) {
+                                tempArray[yCoords[j]] = color
+                            }
+                            //tempArray[pixelY] = color
                         }
                         if (mode == 0) {
                             tempArray[pixelY] = '#000'
@@ -231,19 +312,17 @@
                 
                 matrix = newMatrix
 
-                // redraw new point on the panel
-                var ctx = canvas.getContext('2d')
-                ctx.imageSmoothingEnabled = false
-                ctx.fillStyle = (matrix[pixelX][pixelY] == "#000" ? '#BABABA' : matrix[pixelX][pixelY])
-                ctx.fillRect((pixelX*13)+4, (pixelY*13)+4, 5.5, 5.5)
+                // redraw new point on the panel if the thickness is 1
+                if (thickness == 1) {
+                    var ctx = canvas.getContext('2d')
+                    ctx.imageSmoothingEnabled = false
+                    ctx.fillStyle = (matrix[pixelX][pixelY] == "#000" ? '#BABABA' : matrix[pixelX][pixelY])
+                    ctx.fillRect((pixelX*13)+4, (pixelY*13)+4, 5.5, 5.5)
+                }
+                else {
+                    drawCanvas()
+                }
             }
-
-            // function setColor() {
-                
-            //     mode = 1
-            //     color = document.getElementById("color").value
-            // }
-
             
             pencilButton.onclick = (event) => {
                 if (mode != 1) {
@@ -289,10 +368,16 @@
                     "drawing": drawing
                 }
 
+                // if drawing is empty, inform the user and cancel
+                if (drawing.length < 1) {
+                    alert("Dessinez ou écrivez quelque chose à envoyer !")
+                    return false
+                }
+
                 let req = new XMLHttpRequest()
                 req.addEventListener("load", sendComplete)
                 req.addEventListener("error", sendError)
-                req.open("POST", "http://localhost:3000/send/drawing")
+                req.open("POST", "https://b46161a6.ngrok.io/send/drawing")
                 req.setRequestHeader('Content-Type', 'application/json')
                 req.send(JSON.stringify(drawingJson))
             }
@@ -307,7 +392,7 @@
                 let req = new XMLHttpRequest()
                 req.addEventListener("load", sendComplete)
                 req.addEventListener("error", sendError)
-                req.open("POST", "http://localhost:3000/send/message")
+                req.open("POST", "https://b46161a6.ngrok.io/send/message")
                 req.setRequestHeader('Content-Type', 'application/json')
                 req.send(JSON.stringify(msgJson))
             }
