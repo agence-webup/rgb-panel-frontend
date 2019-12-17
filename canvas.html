@@ -20,14 +20,6 @@
         </a>
         <input type="color" id="colorInput" value="#00F" hidden>
         <span id="color"></span>
-        <!--<div id="pencil-wrapper">
-            <img src="img/pencil.svg" alt="pencil" id="pencil">
-            <span id="thickness-panel">
-                
-            </span>
-        </div>
-        <img src="img/eraser.svg" id="eraser" alt="eraser">
-        -->
     </div>
     <canvas id="panel" width="832" height="416"></canvas>
     <noscript>L'activation de JavaScript est requise pour pouvoir afficher ce contenu</noscript>
@@ -189,54 +181,15 @@
                         thickness = 1
                         break;
                 
-                    case "2": // cross (technically 3x3)
+                    case "2": // 2x2 square
                         thickness = 2
                         break;
 
-                    case "3": // technically a 3x3 square
+                    case "3": // 3x3 square
                         thickness = 3
                         break;
                 }
             })
-    
-            // function drawOnCanvas(x, y, color) {
-            //     // figure out which pixel in the matrix should be changed
-            //     // this shouldn't be too difficult given the fact that each square drawn on the canvas is
-            //     // mapped as 1:1 to a "pixel" in the matrix that controls the canvas-drawn matrix
-
-            //     // each square on the canvas is 13x13 pixels, so we can perform a floor division on the coordinate to get its position in the matrix
-                
-            //     let pixelX = Math.abs(Math.floor(x/13))
-            //     let pixelY = Math.abs(Math.floor(y/13))
-    
-            //     let newMatrix = []
-
-            //     for (i=0; i < matrix.length; i++) {
-            //         // there's some heavy use of JSON.stringify() and JSON.parse() here because we need to actually make copies of each variable
-            //         // rather than passing a reference, in order to counteract JavaScript's default behavior
-            //         let tempArray = []
-            //         tempArray = JSON.parse(JSON.stringify(matrix[i]))
-
-            //         if (i == pixelX) {
-            //             if (mode == 1) {
-            //                 tempArray[pixelY] = color
-            //             }
-            //             if (mode == 0) {
-            //                 tempArray[pixelY] = '#000'
-            //             }
-            //         }
-
-            //         newMatrix.push(JSON.parse(JSON.stringify(tempArray)))
-            //     }
-                
-            //     matrix = newMatrix
-
-            //     // redraw new point on the panel
-            //     var ctx = canvas.getContext('2d')
-            //     ctx.imageSmoothingEnabled = false
-            //     ctx.fillStyle = (matrix[pixelX][pixelY] == "#000" ? '#BABABA' : matrix[pixelX][pixelY])
-            //     ctx.fillRect((pixelX*13)+4, (pixelY*13)+4, 5.5, 5.5)
-            // }
 
             function drawOnCanvas(x, y, color) {
                 // figure out which pixel in the matrix should be changed
@@ -260,7 +213,7 @@
                     // produces a shape like this: 
                     // 11
                     // 11
-                    
+
                     if (pixelY - 1 >= 0) {
                         yCoords.push(pixelY - 1)
                     }
