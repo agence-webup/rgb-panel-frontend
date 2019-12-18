@@ -225,10 +225,10 @@ function drawCanvas() {
     let x = 0;
     let y = 0;
 
-    // start with x2 = y2 = 4
+    // start with x2 = y2 = 3
     // as x and y above, but for the inner square, which actually displays the color
-    let x2 = 4;
-    let y2 = 4;
+    let x2 = 3;
+    let y2 = 3;
 
     // loop through rows and draw them
     for (i = 0; i < matrix.length; i++) {
@@ -239,7 +239,7 @@ function drawCanvas() {
         ctx.fillStyle = "#5A5A5A";
         ctx.fillRect(x + 1, y + 1, 12, 12);
         ctx.fillStyle = matrix[i][j] == "#000" ? "#BABABA" : matrix[i][j];
-        ctx.fillRect(x2, y2, 5.5, 5.5);
+        ctx.fillRect(x2, y2, 8, 8);
 
         // bump up x coordinates for next iteration
         y += 13;
@@ -251,7 +251,7 @@ function drawCanvas() {
       y = 0;
 
       x2 += 13;
-      y2 = 4;
+      y2 = 3;
     }
   }
 }
@@ -332,7 +332,7 @@ function drawOnCanvas(x, y, color) {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle =
       matrix[pixelX][pixelY] == "#000" ? "#BABABA" : matrix[pixelX][pixelY];
-    ctx.fillRect(pixelX * 13 + 4, pixelY * 13 + 4, 5.5, 5.5);
+    ctx.fillRect(pixelX * 13 + 3, pixelY * 13 + 3, 8, 8);
   } else {
     drawCanvas();
   }
