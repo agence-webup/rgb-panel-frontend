@@ -9,25 +9,9 @@
 </head>
 <body>
     <p>Webup RGB (canvas implementation)</p>
-    <div id="tools">
-        <!--<a>
-            <img src="img/pencil.svg" alt="pencil" id="pencil">
-            <span>
-                <input type="range" id="thickness" min="1" max="3" step="1">
-            </span>
-        </a>
-        <a>
-            <img src="img/eraser.svg" alt="eraser" id="eraser">
-        </a>
-        <input type="color" id="colorInput" value="#00F" hidden>
-        <span id="color"></span>-->
-    </div>
+    <div id="tools"></div>
     <canvas id="panel" width="832" height="416"></canvas>
     <noscript>L'activation de JavaScript est requise pour pouvoir afficher ce contenu</noscript>
-    <!--<input type="text" id="message">
-    <button onclick="send()">
-        Envoyer
-    </button>-->
     <script>
         webupRgbPanel('panel', 'tools', 64, 62);
     </script>
