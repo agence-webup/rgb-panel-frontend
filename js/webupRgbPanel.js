@@ -234,9 +234,9 @@ function drawCanvas() {
     for (i = 0; i < matrix.length; i++) {
       // loop again through items in row, draw them
       for (j = 0; j < matrix[i].length; j++) {
-        ctx.strokeStyle = "#646464";
+        ctx.strokeStyle = "#909090";
         ctx.strokeRect(x, y, 13, 13);
-        ctx.fillStyle = "#5A5A5A";
+        ctx.fillStyle = "#777777";
         ctx.fillRect(x + 1, y + 1, 12, 12);
         ctx.fillStyle = matrix[i][j] == "#000" ? "#BABABA" : matrix[i][j];
         ctx.fillRect(x2, y2, 8, 8);
