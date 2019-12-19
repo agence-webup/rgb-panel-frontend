@@ -46,12 +46,29 @@ let mouseDown = false;
             */
 let thicknessPanelVisible = false;
 
-function webupRgbPanel(panelId, toolsId, widthValue, heightValue) {
-  canvas = document.getElementById(panelId);
+function webupRgbPanel(params) {
 
-  let tools = document.getElementById(toolsId);
-  height = heightValue;
-  width = widthValue;
+  if (typeof params.panelId !== "string") {
+    throw new Error("The `panelId` parameter must be a string");
+  }
+  
+  if (typeof params.toolsId !== "string") {
+    throw new Error("The `toolsId` parameter must be a string");
+  }
+
+  if (typeof params.widthValue !== "number") {
+    throw new Error("The `widthValue` parameter must be a number");
+  }
+
+  if (typeof params.heightValue !== "number") {
+    throw new Error("The `heightValue` parameter must be a number");
+  }
+
+  canvas = document.getElementById(params.panelId);
+
+  let tools = document.getElementById(params.toolsId);
+  height = params.heightValue;
+  width = params.widthValue;
 
   let pencilNode = document.createElement("a");
   let pencilInputNode = document.createElement("img");
