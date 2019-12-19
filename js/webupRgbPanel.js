@@ -149,9 +149,17 @@ function webupRgbPanel(params) {
     mouseDown = true;
   });
 
+  canvas.addEventListener("touchstart", () => {
+    mouseDown = true;
+  })
+
   canvas.addEventListener("mouseup", () => {
     mouseDown = false;
   });
+
+  canvas.addEventListener("touchend", () => {
+    mouseDown = false;
+  })
 
   canvas.addEventListener("mousemove", e => {
     if (mouseDown == true) {
@@ -161,6 +169,14 @@ function webupRgbPanel(params) {
       drawOnCanvas((x = mouseX), (y = mouseY), (color = color));
     }
   });
+
+  canvas.addEventListener("touchmove", e => {
+    if (mouseDown == true) {
+      let mouseX = e.pageX - canvas.offsetLeft;
+      let mouseY = e.pageY - canvas.offsetTop;
+      drawOnCanvas((x = mouseX), (y = mouseY), (color = color));
+    }
+  })
 
   colorPreview.addEventListener("click", function() {
     colorInput.focus();
