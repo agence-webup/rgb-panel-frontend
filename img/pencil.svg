@@ -1,10 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27">
   <g fill="none" fill-rule="evenodd" transform="translate(-237 -5285)">
-    <rect width="1440" height="6017" fill="#FBFBFA"/>
-    <rect width="1440" height="1051" x="1" y="4603" fill="#FBFBFA"/>
     <g transform="translate(221 5267)">
-      <rect width="59" height="161" x=".5" y=".5" fill="#E5E6E8" stroke="#596270" stroke-opacity=".367"/>
-      <rect width="38" height="38" x="11" y="12" fill="#FFF" stroke="#34486A" stroke-width="2"/>
       <g fill-rule="nonzero" transform="translate(17 19)">
         <polygon fill="#2D346A" points="4.551 23.301 0 25 1.693 20.449 1.705 20.455 4.545 23.295"/>
         <polygon fill="#FFF" points="7.028 17.972 10.239 21.182 4.551 23.301 4.545 23.295 1.705 20.455 1.693 20.449 3.818 14.756"/>

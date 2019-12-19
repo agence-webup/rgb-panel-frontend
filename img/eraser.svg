@@ -1,9 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="25" height="23" viewBox="0 0 25 23">
   <g fill="none" fill-rule="evenodd" transform="translate(-238 -5336)">
-    <rect width="1440" height="6017" fill="#FBFBFA"/>
-    <rect width="1440" height="1051" x="1" y="4603" fill="#FBFBFA"/>
     <g transform="translate(221 5267)">
-      <rect width="59" height="161" x=".5" y=".5" fill="#E5E6E8" stroke="#596270" stroke-opacity=".367"/>
       <g fill-rule="nonzero" transform="translate(17 69)">
         <path fill="#FF2C55" d="M4.98,12.9836 L0.917,17.1866 C0.361,17.7606 0.361,18.6896 0.917,19.2636 L4.048,22.5036 L9.956,22.5036 L12.189,20.1926 L4.98,12.9836 Z"/>
         <polygon fill="#FC0" points="16.5 .503 24.5 8.503 12.5 20.503 4.5 12.503"/>
