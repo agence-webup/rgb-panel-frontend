@@ -14,6 +14,8 @@ let width;
 let matrixCol = [];
 let canvasDrawn = false;
 
+let apiEndpoint;
+
 // Drawing parameters
 /*
                 modes:
@@ -63,6 +65,12 @@ function webupRgbPanel(params) {
   if (!Number.isInteger(params.heightValue)) {
     throw new Error("The `heightValue` parameter must be an integer");
   }
+
+  if (typeof params.endpoint !== "string") {
+    throw new Error("The `endpoint` parameter must be a string")
+  }
+
+  apiEndpoint = params.endpoint
 
   canvas = document.getElementById(params.panelId);
 
@@ -386,7 +394,7 @@ function sendDrawing() {
   let req = new XMLHttpRequest();
   req.addEventListener("load", sendComplete);
   req.addEventListener("error", sendError);
-  req.open("POST", "https://b46161a6.ngrok.io/send/drawing");
+  req.open("POST", `${apiEndpoint}/send/drawing`);
   req.setRequestHeader("Content-Type", "application/json");
   req.send(JSON.stringify(drawingJson));
 }
@@ -401,7 +409,7 @@ function sendMessage() {
   let req = new XMLHttpRequest();
   req.addEventListener("load", sendComplete);
   req.addEventListener("error", sendError);
-  req.open("POST", "https://b46161a6.ngrok.io/send/message");
+  req.open("POST", `${apiEndpoint}/send/message`);
   req.setRequestHeader("Content-Type", "application/json");
   req.send(JSON.stringify(msgJson));
 }
