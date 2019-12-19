@@ -56,12 +56,12 @@ function webupRgbPanel(params) {
     throw new Error("The `toolsId` parameter must be a string");
   }
 
-  if (typeof params.widthValue !== "number") {
-    throw new Error("The `widthValue` parameter must be a number");
+  if (!Number.isInteger(params.widthValue)) {
+    throw new Error("The `widthValue` parameter must be an integer");
   }
 
-  if (typeof params.heightValue !== "number") {
-    throw new Error("The `heightValue` parameter must be a number");
+  if (!Number.isInteger(params.heightValue)) {
+    throw new Error("The `heightValue` parameter must be an integer");
   }
 
   canvas = document.getElementById(params.panelId);
