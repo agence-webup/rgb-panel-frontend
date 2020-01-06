@@ -1,6 +1,11 @@
-#panel {
+#webup_rgb {
     display: flex;
-    align-content: flex-start;
+    align-items: center;
+    justify-content: space-evenly;
+    max-width: 930px;
+}
+
+#panel {
     filter: drop-shadow(0 0 0.75rem rgba(0, 0, 0, 0.5));
     /*user-select: none;*/
 }

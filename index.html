@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas test thingy</title>
+    <title>rgb-panel-frontend</title>
     <link rel="stylesheet" href="style.css">
     <script src="js/webupRgbPanel.js"></script>
 </head>
 <body>
     <p>Webup RGB (canvas implementation)</p>
-    <div id="tools"></div>
-    <canvas id="panel" width="832" height="416"></canvas>
-    <noscript>L'activation de JavaScript est requise pour pouvoir afficher ce contenu</noscript>
+    <div id="webup_rgb">
+        <div id="tools"></div>
+        <canvas id="panel" width="832" height="416"></canvas>
+        <noscript>L'activation de JavaScript est requise pour pouvoir afficher ce contenu</noscript>
+    </div>
     <script>
         webupRgbPanel({panelId: "panel", toolsId: "tools", widthValue: 64, heightValue: 32, endpoint: "http://localhost:3000"});
     </script>

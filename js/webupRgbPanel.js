@@ -1,3 +1,4 @@
+let webupRgb;
 let canvas;
 let messageBox;
 let colorInput;
@@ -72,6 +73,8 @@ function webupRgbPanel(params) {
 
   apiEndpoint = params.endpoint
 
+  webupRgb = document.getElementById('webup_rgb');
+
   canvas = document.getElementById(params.panelId);
 
   let tools = document.getElementById(params.toolsId);
@@ -132,8 +135,8 @@ function webupRgbPanel(params) {
   tools.append(eraserNode);
   tools.append(colorInputNode);
   tools.append(colorNode);
-  canvas.parentNode.insertBefore(sendButtonNode, canvas.nextSibling);
-  canvas.parentNode.insertBefore(textInputNode, canvas.nextSibling);
+  webupRgb.parentNode.insertBefore(sendButtonNode, webupRgb.nextSibling);
+  webupRgb.parentNode.insertBefore(textInputNode, webupRgb.nextSibling);
 
   messageBox = document.getElementById("message");
   pencilButton = document.getElementById("pencil");
