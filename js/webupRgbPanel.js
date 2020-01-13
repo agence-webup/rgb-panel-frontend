@@ -353,7 +353,7 @@ class WebupRgb {
     }
   
     let req = new XMLHttpRequest();
-    req.addEventListener("load", this.sendComplete);
+    req.addEventListener("load", this.init());
     req.addEventListener("error", this.sendError);
     req.open("POST", `${this.apiEndpoint}/send/drawing`);
     req.setRequestHeader("Content-Type", "application/json");
@@ -368,7 +368,7 @@ class WebupRgb {
     };
   
     let req = new XMLHttpRequest();
-    req.addEventListener("load", this.sendComplete);
+    req.addEventListener("load", () => {this.messageBox.value = ''; this.init()});
     req.addEventListener("error", this.sendError);
     req.open("POST", `${this.apiEndpoint}/send/message`);
     req.setRequestHeader("Content-Type", "application/json");
@@ -390,10 +390,6 @@ class WebupRgb {
           b: parseInt(result[3], 16)
         }
       : null;
-  }
-  
-  sendComplete() {
-    this.init();
   }
   
   sendError() {
