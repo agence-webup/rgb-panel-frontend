@@ -7,3 +7,10 @@ Uses a [`rgb-panel-api`](https://github.com/agence-webup/rgb-panel-api) endpoint
 
 > __Note:__
 `rgb-panel-frontend` is currently a WIP, and is not yet ready for production use.
+
+# local dev
+
+```
+npm install
+npm run dev
+```
