@@ -5,7 +5,7 @@ html {
 
 #webup_rgb {
     display: flex;
-    align-items: center;
+    align-items: top;
     justify-content: space-evenly;
     /* max-width: 930px; */
     width: 930px;
@@ -20,11 +20,6 @@ html {
 }
 
 #pencil, #eraser, #panel {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
 }
 
@@ -48,7 +43,6 @@ html {
     margin-left: 25%;
     width: 25px;
     margin-top: 20px;
-    /*border: 2px solid rgba(0, 0, 0, 0);*/
 }
 
 
@@ -107,8 +101,6 @@ html {
 
 a {
     position: relative;
-    /*background: white;
-    border: solid 3px #aaa;*/
     cursor: pointer;
     font-size: 20px;
     display: inline-block;
@@ -143,6 +135,7 @@ a {
     display: none;
     z-index: 1;
   }
+  
   a span::before {
     content: '';
     position: absolute;
