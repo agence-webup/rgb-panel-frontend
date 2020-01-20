@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "prefix": "postcss src/webup-rgb-pannel.css --use=autoprefixer --output=dist/webup-rgb-pannel.css",
-    "minify": "cleancss --level=1 --output dist/webup-rgb-pannel.min.css dist/webup-rgb-pannel.css",
+    "prefix": "postcss src/webup-rgb-panel.css --use=autoprefixer --output=dist/webup-rgb-panel.css",
+    "minify": "cleancss --level=1 --output dist/webup-rgb-panel.min.css dist/webup-rgb-panel.css",
     "build:css": "npm run prefix && npm run minify",
     "build:js": "rollup --watch --config build/umd.js && rollup --config build/umd.min.js",
     "build": "npm run clean && npm run build:js && npm run build:css",

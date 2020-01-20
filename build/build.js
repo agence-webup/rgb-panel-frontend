@@ -3,7 +3,7 @@ import babel from 'rollup-plugin-babel'
 
 export default {
   output: {
-    name: 'WebupRGBPannel',
+    name: 'WebupRGBPanel',
     banner
   },
   plugins: [

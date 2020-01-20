@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>rgb-panel-frontend</title>
-    <link rel="stylesheet" href="webup-rgb-pannel.css">
+    <link rel="stylesheet" href="webup-rgb-panel.css">
 </head>
 <body>
     <p>Webup RGB (canvas implementation)</p>
@@ -13,10 +13,12 @@
         <canvas id="panel" width="832" height="416"></canvas>
         <noscript>L'activation de JavaScript est requise pour pouvoir afficher ce contenu</noscript>
     </div>
-    <script src="webup-rgb-pannel.js"></script>
+    <button id="send">Envoyer</button>
+    <button id="clear">Effacer</button>
+    <script src="webup-rgb-panel.js"></script>
     <script>
-        new WebupRGBPannel("panel", "tools", 64, 32, "http://localhost:3000")
-        // webupRgbPanel({panelId: "panel", toolsId: "tools", widthValue: 64, heightValue: 32, endpoint: "http://localhost:3000"});
+        new WebupRGBPanel("panel", "tools", 64, 32, "http://104.248.134.205:3000", 'send', 'clear')
+        
     </script>
 </body>
 </html>
