@@ -8,7 +8,7 @@
     "prefix": "postcss src/webup-rgb-panel.css --use=autoprefixer --output=dist/webup-rgb-panel.css",
     "minify": "cleancss --level=1 --output dist/webup-rgb-panel.min.css dist/webup-rgb-panel.css",
     "build:css": "npm run prefix && npm run minify",
-    "build:js": "rollup --watch --config build/umd.js && rollup --config build/umd.min.js",
+    "build:js": "rollup --config build/umd.js && rollup --config build/umd.min.js",
     "build": "npm run clean && npm run build:js && npm run build:css",
     "watch:js": "onchange 'src/**/*.js' -- npm run build:js",
     "watch:css": "onchange 'src/**/*.css' -- npm run build:css",

@@ -4,7 +4,7 @@ html {
 
 #webup_rgb {
     display: flex;
-    align-items: start;
+    align-items: flex-start;
     justify-content: space-evenly;
     width: 930px;
     max-width: 100%;
