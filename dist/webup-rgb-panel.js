@@ -1,5 +1,5 @@
 /*!
- * WebupRGBPanel v1.0.0
+ * WebupRGBPanel v2.0.2
  * (c) 2016-2020 Agence Webup
  * Released under the MIT License.
  */
@@ -89,7 +89,6 @@
       this.thicknessSize1 = document.getElementById('size1');
       this.thicknessSize2 = document.getElementById('size2');
       this.thicknessSize3 = document.getElementById('size3');
-      this.sendButton = document.getElementById('send');
       this.init();
       this.canvas.addEventListener('mousedown', function () {
         _this.mouseDown = true;
