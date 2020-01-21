@@ -69,7 +69,6 @@ export default class WebupRgbPanel {
     this.thicknessSize1 = document.getElementById('size1')
     this.thicknessSize2 = document.getElementById('size2')
     this.thicknessSize3 = document.getElementById('size3')
-    this.sendButton = document.getElementById('send')
 
     this.init()
 
