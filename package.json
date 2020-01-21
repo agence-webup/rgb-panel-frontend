@@ -1,5 +1,5 @@
 {
-  "name": "rgb-panel-frontend",
+  "name": "@agence-webup/rgb-panel-frontend",
   "version": "1.0.0",
   "description": "Frontend for the RGB Panel project.",
   "main": "index.js",
@@ -19,7 +19,7 @@
     "url": "git+https://github.com/agence-webup/rgb-panel-frontend.git"
   },
   "author": "Agence Webup",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/agence-webup/rgb-panel-frontend/issues"
   },
@@ -44,5 +44,6 @@
     "rollup": "^1.29.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-uglify": "^6.0.4"
-  }
+  },
+  "dependencies": {}
 }
