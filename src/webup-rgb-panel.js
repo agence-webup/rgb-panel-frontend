@@ -1,77 +1,63 @@
+const CSS = {
+  toolSelected: 'toolSelected'
+}
+
 export default class WebupRgbPanel {
-  constructor (panelId, toolsId, widthValue, heightValue, endpoint, sendButtonId, clearButtonId) {
-    this.panelId = panelId
-    this.toolsId = toolsId
+  constructor (panelTarget, toolsTarget, widthValue, heightValue, endpoint, sendButtonId, clearButtonId) {
+    this.panelId = panelTarget
+    this.toolsId = toolsTarget
     this.width = widthValue
     this.height = heightValue
     this.apiEndpoint = endpoint
     this.matrix = []
 
-    // Drawing parameters
-    /*
-    modes:
-    0 - erase mode
-    1 - draw mode
-    */
-    this.mode = 1
-
-    /*
-   thickness: <1|2|3>
-   */
-    this.thickness = 1
-
-    /*
-   input color: <hex value>
-   */
-    this.color = '#00F'
-
-    /*
-   mouseDown: boolean
-   */
+    this.mode = 1 // 0: erase, 1:pen
+    this.thickness = 2 // 1|2|3
+    this.color = '#2FCC71'
     this.mouseDown = false
-
-    /*
-   visibility of thickness panel: boolean
-   */
     this.thicknessPanelVisible = false
-
     this.rgbWrapper = document.getElementById('webup_rgb')
-
-    this.canvas = document.getElementById(this.panelId)
-
-    this.tools = document.getElementById(this.toolsId)
+    this.canvas = this.panelId
     this.sendButton = document.getElementById(sendButtonId)
     this.clearButton = document.getElementById(clearButtonId)
 
-    const toolsMarkup = `
-    ${this.assetSize(1)}
-    ${this.assetSize(2)}
-    ${this.assetSize(3)}
-    <a>
-      <img id="pencil" src="${this.assetPencil()}" alt="pencil">
-    </a>
-    <a>
-      <img src="${this.assetEraser()}" alt="eraser" id="eraser">
-    </a>
-    <span id="colorWrapper">
-      <input type="color" id="colorInput" value="#00F">
-      <img src="${this.assetColorPalette()}" id="color">
-    </span>
-    `
+    this.ui = {
+      btnSize1: document.createElement('button'),
+      btnSize2: document.createElement('button'),
+      btnSize3: document.createElement('button'),
+      btnPencil: document.createElement('button'),
+      btnErase: document.createElement('button'),
+      btnColor: document.createElement('button'),
+      inputColor: document.createElement('input')
+    }
 
-    this.tools.insertAdjacentHTML('afterbegin', toolsMarkup)
+    this.ui.btnSize1.innerHTML = this.asset('size1')
+    this.ui.btnSize2.innerHTML = this.asset('size2')
+    this.ui.btnSize3.innerHTML = this.asset('size3')
+    this.ui.btnPencil.innerHTML = this.asset('pencil')
+    this.ui.btnErase.innerHTML = this.asset('erase')
+    this.ui.btnColor.innerHTML = this.asset('color')
+    this.ui.btnColor.appendChild(this.ui.inputColor)
+
+    this.ui.inputColor.type = 'color'
+    this.ui.inputColor.value = this.color
+    this.ui.inputColor.tabindex = -1
+    this.ui.inputColor.classList.add('rgbpanel-hidden')
+
+    this.toolsId.appendChild(this.ui.btnSize1)
+    this.toolsId.appendChild(this.ui.btnSize2)
+    this.toolsId.appendChild(this.ui.btnSize3)
+    this.toolsId.appendChild(this.ui.btnPencil)
+    this.toolsId.appendChild(this.ui.btnErase)
+    this.toolsId.appendChild(this.ui.btnColor)
 
     this.messageBox = document.getElementById('message')
-    this.pencilButton = document.getElementById('pencil')
-    this.eraserButton = document.getElementById('eraser')
-    this.colorInput = document.getElementById('colorInput')
-    this.colorPreview = document.getElementById('color')
-    this.thicknessSize1 = document.getElementById('size1')
-    this.thicknessSize2 = document.getElementById('size2')
-    this.thicknessSize3 = document.getElementById('size3')
 
     this.init()
+    this.bindEvents()
+  }
 
+  bindEvents () {
     this.canvas.addEventListener('mousedown', () => {
       this.mouseDown = true
     })
@@ -97,7 +83,6 @@ export default class WebupRgbPanel {
 
         const mouseX = (e.pageX - this.canvas.offsetLeft) * ratio
         const mouseY = (e.pageY - this.canvas.offsetTop) * ratio
-
         this.drawOnCanvas(mouseX, mouseY, this.color)
       }
     })
@@ -117,48 +102,48 @@ export default class WebupRgbPanel {
       }
     })
 
-    this.colorPreview.addEventListener('click', () => {
-      this.colorInput.value = this.color
+    this.ui.inputColor.addEventListener('change', () => {
+      this.setColor(this.ui.inputColor.value)
     })
 
-    this.colorInput.addEventListener('change', () => {
-      this.setColor()
+    this.ui.inputColor.addEventListener('input', () => {
+      this.setColor(this.ui.inputColor.value)
     })
 
-    this.colorInput.addEventListener('input', () => {
-      this.setColor()
+    this.ui.btnSize1.addEventListener('click', () => {
+      this.setThickness(1)
     })
 
-    this.thicknessSize1.addEventListener('click', () => {
-      this.setThickness(this.thicknessSize1)
+    this.ui.btnSize2.addEventListener('click', () => {
+      this.setThickness(2)
     })
 
-    this.thicknessSize2.addEventListener('click', () => {
-      this.setThickness(this.thicknessSize2)
+    this.ui.btnSize3.addEventListener('click', () => {
+      this.setThickness(3)
     })
 
-    this.thicknessSize3.addEventListener('click', () => {
-      this.setThickness(this.thicknessSize3)
-    })
-
-    this.pencilButton.addEventListener('click', () => {
+    this.ui.btnPencil.addEventListener('click', () => {
       if (this.mode !== 1) {
         this.mode = 1
-        if (this.eraserButton.classList.contains('toolSelected')) {
-          this.eraserButton.classList.remove('toolSelected')
+        if (this.ui.btnErase.classList.contains('toolSelected')) {
+          this.ui.btnErase.classList.remove('toolSelected')
         }
-        this.pencilButton.classList.add('toolSelected')
+        this.ui.btnPencil.classList.add('toolSelected')
       }
     })
 
-    this.eraserButton.addEventListener('click', () => {
+    this.ui.btnErase.addEventListener('click', () => {
       if (this.mode !== 0) {
         this.mode = 0
-        if (this.pencilButton.classList.contains('toolSelected')) {
-          this.pencilButton.classList.remove('toolSelected')
+        if (this.ui.btnPencil.classList.contains('toolSelected')) {
+          this.ui.btnPencil.classList.remove('toolSelected')
         }
-        this.eraserButton.classList.add('toolSelected')
+        this.ui.btnErase.classList.add('toolSelected')
       }
+    })
+
+    this.ui.btnColor.addEventListener('click', () => {
+      this.ui.inputColor.click()
     })
 
     this.sendButton.addEventListener('click', () => {
@@ -171,6 +156,10 @@ export default class WebupRgbPanel {
   }
 
   init () {
+    this.setColor(this.color)
+    this.ui.btnSize2.classList.add(CSS.toolSelected)
+    this.ui.btnPencil.classList.add(CSS.toolSelected)
+
     // reset matrix just in case
     this.matrix = []
     const matrixCol = []
@@ -186,82 +175,39 @@ export default class WebupRgbPanel {
     }
 
     this.drawCanvas()
-
-    this.pencilButton.classList.add('toolSelected')
-    let smallFill = document.getElementById('smallFill')
-    smallFill.setAttribute('fill', this.color)
-
-    let mediumFill = document.getElementById('mediumFill')
-    mediumFill.setAttribute('fill', this.color)
-
-    let largeFill = document.getElementById('largeFill')
-    largeFill.setAttribute('fill', this.color)
   }
 
-  setThickness (elementClicked) {
-    if (this.thicknessSize1.classList.contains('toolSelected')) {
-      this.thicknessSize1.classList.remove('toolSelected')
-    }
+  setThickness (thickness) {
+    this.ui.btnSize1.classList.remove(CSS.toolSelected)
+    this.ui.btnSize2.classList.remove(CSS.toolSelected)
+    this.ui.btnSize3.classList.remove(CSS.toolSelected)
 
-    if (this.thicknessSize2.classList.contains('toolSelected')) {
-      this.thicknessSize2.classList.remove('toolSelected')
-    }
-
-    if (this.thicknessSize3.classList.contains('toolSelected')) {
-      this.thicknessSize3.classList.remove('toolSelected')
-    }
-
-    switch (elementClicked.id) {
-      case 'size1':
+    switch (thickness) {
+      case 1:
         this.thickness = 1
+        this.ui.btnSize1.classList.add(CSS.toolSelected)
         break
 
-      case 'size2':
+      case 2:
         this.thickness = 2
+        this.ui.btnSize2.classList.add(CSS.toolSelected)
         break
 
-      case 'size3':
+      case 3:
         this.thickness = 3
+        this.ui.btnSize3.classList.add(CSS.toolSelected)
         break
 
       default:
         break
     }
-
-    elementClicked.classList.add('toolSelected')
-
-    let smallFill = document.getElementById('smallFill')
-    smallFill.setAttribute('fill', this.color)
-
-    let mediumFill = document.getElementById('mediumFill')
-    mediumFill.setAttribute('fill', this.color)
-
-    let largeFill = document.getElementById('largeFill')
-    largeFill.setAttribute('fill', this.color)
   }
 
-  setColor () {
-    // Immediately set mode to draw when color is picked
-    this.mode = 1
-    if (!this.pencilButton.classList.contains('toolSelected')) {
-      this.pencilButton.classList.add('toolSelected')
-    }
-
-    if (this.eraserButton.classList.contains('toolSelected')) {
-      this.eraserButton.classList.remove('toolSelected')
-    }
-
-    this.color = this.colorInput.value
-    this.colorPreview.style.backgroundColor = this.color
-
-    let smallFill = document.getElementById('smallFill')
-    smallFill.setAttribute('fill', this.color)
-
-    let mediumFill = document.getElementById('mediumFill')
-    mediumFill.setAttribute('fill', this.color)
-
-    let largeFill = document.getElementById('largeFill')
-    largeFill.setAttribute('fill', this.color)
+  setColor (color) {
+    this.color = color
+    this.ui.btnSize1.style.color = color
+    this.ui.btnSize2.style.color = color
+    this.ui.btnSize3.style.color = color
   }
 
   drawCanvas () {
@@ -284,11 +230,11 @@ export default class WebupRgbPanel {
       for (let i = 0; i < this.matrix.length; i++) {
         // loop again through items in row, draw them
         for (let j = 0; j < this.matrix[i].length; j++) {
-          ctx.strokeStyle = '#909090'
+          ctx.strokeStyle = '#8E8E8E'
           ctx.strokeRect(x, y, 13, 13)
-          ctx.fillStyle = '#777777'
+          ctx.fillStyle = '#5A5A5A'
           ctx.fillRect(x + 1, y + 1, 12, 12)
-          ctx.fillStyle = this.matrix[i][j] == '#000' ? '#BABABA' : this.matrix[i][j]
+          ctx.fillStyle = this.matrix[i][j] == '#000' ? '#CACACA' : this.matrix[i][j]
           ctx.fillRect(x2, y2, 8, 8)
 
           // bump up x coordinates for next iteration
@@ -464,39 +410,28 @@ export default class WebupRgbPanel {
     if (this.messageBox !== null) {
       if (this.messageBox.value.length > 0) {
         this.sendMessage()
-      }
-      else {
+      } else {
         this.sendDrawing()
       }
-    }
-    else {
+    } else {
       this.sendDrawing()
     }
   }
 
-  assetColorPalette () {
-    return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzEgLTU1MDIpIj4KICAgIDxyZWN0IHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjYwNDciIGZpbGw9IiNGQkZCRkEiLz4KICAgIDxyZWN0IHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjEwNTEiIHg9IjEiIHk9IjQ2MDMiIGZpbGw9IiNGQkZCRkEiLz4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyMSA1MjY3KSI+CiAgICAgIDxyZWN0IHdpZHRoPSI1OSIgaGVpZ2h0PSIyODQiIHg9Ii41IiB5PSIuNSIgZmlsbD0iI0U1RTZFOCIgc3Ryb2tlPSIjNTk2MjcwIiBzdHJva2Utb3BhY2l0eT0iLjM2NyIvPgogICAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMCAyMzUpIj4KICAgICAgICA8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiLz4KICAgICAgICA8ZyBmaWxsLXJ1bGU9Im5vbnplcm8iIHRyYW5zZm9ybT0idHJhbnNsYXRlKDggOCkiPgogICAgICAgICAgPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTAuNTIwODMzMzMzLDExLjk4MjM5NTggQzAuNTIwODMzMzMzLDQuMzQzODU0MTcgNi4yNSwwLjUyNDA2MjUgMTEuOTc5MTY2NywwLjUyNDA2MjUgQzE4LjY2MzU0MTcsMC41MjQwNjI1IDIzLjQzNzUsNi4yNTMyMjkxNyAyMy40Mzc1LDEwLjA3MzAyMDggQzIzLjQzNzUsMTMuODkxNzcwOCAyMS41MjgxMjUsMTQuODQ2OTc5MiAxOC42NjM1NDE3LDE0Ljg0Njk3OTIgQzE1Ljc5ODk1ODMsMTQuODQ2OTc5MiAxNC44NDM3NSwxNi43NTYzNTQyIDE0Ljg0Mzc1LDE5LjYyMDkzNzUgQzE0Ljg0Mzc1LDIyLjQ4NTUyMDggMTIuOTM0Mzc1LDIzLjQ0MDcyOTIgMTEuMDIzOTU4MywyMy40NDA3MjkyIEM3LjIwNTIwODMzLDIzLjQ0MDcyOTIgMC41MjA4MzMzMzMsMTkuNjIwOTM3NSAwLjUyMDgzMzMzMywxMS45ODIzOTU4Ii8+CiAgICAgICAgICA8cGF0aCBmaWxsPSIjNENEOTY0IiBkPSJNMTEuOTc5MTY2NywxOC43NTMyMjkyIEMxMS45NzkxNjY3LDE5LjYxNTcyOTIgMTEuMjgwMjA4MywyMC4zMTU3MjkyIDEwLjQxNjY2NjcsMjAuMzE1NzI5MiBDOS41NTMxMjUsMjAuMzE1NzI5MiA4Ljg1NDE2NjY3LDE5LjYxNTcyOTIgOC44NTQxNjY2NywxOC43NTMyMjkyIEM4Ljg1NDE2NjY3LDE3Ljg5MDcyOTIgOS41NTMxMjUsMTcuMTkwNzI5MiAxMC40MTY2NjY3LDE3LjE5MDcyOTIgQzExLjI4MDIwODMsMTcuMTkwNzI5MiAxMS45NzkxNjY3LDE3Ljg5MDcyOTIgMTEuOTc5MTY2NywxOC43NTMyMjkyIi8+CiAgICAgICAgICA8cGF0aCBmaWxsPSIjMzM5RUZGIiBkPSJNNy44MTI1LDE0LjU4NjU2MjUgQzcuODEyNSwxNS40NDkwNjI1IDcuMTEzNTQxNjcsMTYuMTQ5MDYyNSA2LjI1LDE2LjE0OTA2MjUgQzUuMzg2NDU4MzMsMTYuMTQ5MDYyNSA0LjY4NzUsMTUuNDQ5MDYyNSA0LjY4NzUsMTQuNTg2NTYyNSBDNC42ODc1LDEzLjcyNDA2MjUgNS4zODY0NTgzMywxMy4wMjQwNjI1IDYuMjUsMTMuMDI0MDYyNSBDNy4xMTM1NDE2NywxMy4wMjQwNjI1IDcuODEyNSwxMy43MjQwNjI1IDcuODEyNSwxNC41ODY1NjI1Ii8+CiAgICAgICAgICA8cGF0aCBmaWxsPSIjRkMwIiBkPSJNNy44MTI1LDguODU3Mzk1ODMgQzcuODEyNSwxMC4wMDczOTU4IDYuODc5MTY2NjcsMTAuOTQwNzI5MiA1LjcyOTE2NjY3LDEwLjk0MDcyOTIgQzQuNTc5MTY2NjcsMTAuOTQwNzI5MiAzLjY0NTgzMzMzLDEwLjAwNzM5NTggMy42NDU4MzMzMyw4Ljg1NzM5NTgzIEMzLjY0NTgzMzMzLDcuNzA3Mzk1ODMgNC41NzkxNjY2Nyw2Ljc3NDA2MjUgNS43MjkxNjY2Nyw2Ljc3NDA2MjUgQzYuODc5MTY2NjcsNi43NzQwNjI1IDcuODEyNSw3LjcwNzM5NTgzIDcuODEyNSw4Ljg1NzM5NTgzIi8+CiAgICAgICAgICA8cGF0aCBmaWxsPSIjRkYyQzU1IiBkPSJNMTQuMDYyNSw1LjczMjM5NTgzIEMxNC4wNjI1LDYuODgyMzk1ODMgMTMuMTI5MTY2Nyw3LjgxNTcyOTE3IDExLjk3OTE2NjcsNy44MTU3MjkxNyBDMTAuODI5MTY2Nyw3LjgxNTcyOTE3IDkuODk1ODMzMzMsNi44ODIzOTU4MyA5Ljg5NTgzMzMzLDUuNzMyMzk1ODMgQzkuODk1ODMzMzMsNC41ODIzOTU4MyAxMC44MjkxNjY3LDMuNjQ5MDYyNSAxMS45NzkxNjY3LDMuNjQ5MDYyNSBDMTMuMTI5MTY2NywzLjY0OTA2MjUgMTQuMDYyNSw0LjU4MjM5NTgzIDE0LjA2MjUsNS43MzIzOTU4MyIvPgogICAgICAgICAgPHBhdGggZmlsbD0iIzdGMkVGRiIgZD0iTTIwLjMxMjUsOC44NTczOTU4MyBDMjAuMzEyNSwxMC4wMDczOTU4IDE5LjM3OTE2NjcsMTAuOTQwNzI5MiAxOC4yMjkxNjY3LDEwLjk0MDcyOTIgQzE3LjA3OTE2NjcsMTAuOTQwNzI5MiAxNi4xNDU4MzMzLDEwLjAwNzM5NTggMTYuMTQ1ODMzMyw4Ljg1NzM5NTgzIEMxNi4xNDU4MzMzLDcuNzA3Mzk1ODMgMTcuMDc5MTY2Nyw2Ljc3NDA2MjUgMTguMjI5MTY2Nyw2Ljc3NDA2MjUgQzE5LjM3OTE2NjcsNi43NzQwNjI1IDIwLjMxMjUsNy43MDczOTU4MyAyMC4zMTI1LDguODU3Mzk1ODMiLz4KICAgICAgICAgIDxwYXRoIGZpbGw9IiMyRDM0NkEiIGQ9Ik0xOS43OTE2NjY3LDguODU3Mzk1ODMgQzE5Ljc5MTY2NjcsOS43MTg4NTQxNyAxOS4wOTA2MjUsMTAuNDE5ODk1OCAxOC4yMjkxNjY3LDEwLjQxOTg5NTggQzE3LjM2NzcwODMsMTAuNDE5ODk1OCAxNi42NjY2NjY3LDkuNzE4ODU0MTcgMTYuNjY2NjY2Nyw4Ljg1NzM5NTgzIEMxNi42NjY2NjY3LDcuOTk1OTM3NSAxNy4zNjc3MDgzLDcuMjk0ODk1ODMgMTguMjI5MTY2Nyw3LjI5NDg5NTgzIEMxOS4wOTA2MjUsNy4yOTQ4OTU4MyAxOS43OTE2NjY3LDcuOTk1OTM3NSAxOS43OTE2NjY3LDguODU3Mzk1ODMgTTE1LjYyNSw4Ljg1NzM5NTgzIEMxNS42MjUsMTAuMjkzODU0MiAxNi43OTM3NSwxMS40NjE1NjI1IDE4LjIyOTE2NjcsMTEuNDYxNTYyNSBDMTkuNjY0NTgzMywxMS40NjE1NjI1IDIwLjgzMzMzMzMsMTAuMjkzODU0MiAyMC44MzMzMzMzLDguODU3Mzk1ODMgQzIwLjgzMzMzMzMsNy40MjA5Mzc1IDE5LjY2NDU4MzMsNi4yNTMyMjkxNyAxOC4yMjkxNjY3LDYuMjUzMjI5MTcgQzE2Ljc5Mzc1LDYuMjUzMjI5MTcgMTUuNjI1LDcuNDIwOTM3NSAxNS42MjUsOC44NTczOTU4MyBNMTEuOTc5MTY2Nyw3LjI5NDg5NTgzIEMxMS4xMTc3MDgzLDcuMjk0ODk1ODMgMTAuNDE2NjY2Nyw2LjU5Mzg1NDE3IDEwLjQxNjY2NjcsNS43MzIzOTU4MyBDMTAuNDE2NjY2Nyw0Ljg3MDkzNzUgMTEuMTE3NzA4Myw0LjE2OTg5NTgzIDExLjk3OTE2NjcsNC4xNjk4OTU4MyBDMTIuODQwNjI1LDQuMTY5ODk1ODMgMTMuNTQxNjY2Nyw0Ljg3MDkzNzUgMTMuNTQxNjY2Nyw1LjczMjM5NTgzIEMxMy41NDE2NjY3LDYuNTkzODU0MTcgMTIuODQwNjI1LDcuMjk0ODk1ODMgMTEuOTc5MTY2Nyw3LjI5NDg5NTgzIE0xMS45NzkxNjY3LDMuMTI4MjI5MTcgQzEwLjU0Mzc1LDMuMTI4MjI5MTcgOS4zNzUsNC4yOTU5Mzc1IDkuMzc1LDUuNzMyMzk1ODMgQzkuMzc1LDcuMTY4ODU0MTcgMTAuNTQzNzUsOC4zMzY1NjI1IDExLjk3OTE2NjcsOC4zMzY1NjI1IEMxMy40MTQ1ODMzLDguMzM2NTYyNSAxNC41ODMzMzMzLDcuMTY4ODU0MTcgMTQuNTgzMzMzMyw1LjczMjM5NTgzIEMxNC41ODMzMzMzLDQuMjk1OTM3NSAxMy40MTQ1ODMzLDMuMTI4MjI5MTcgMTEuOTc5MTY2NywzLjEyODIyOTE3IE00LjE2NjY2NjY3LDguODU3Mzk1ODMgQzQuMTY2NjY2NjcsNy45OTU5Mzc1IDQuODY3NzA4MzMsNy4yOTQ4OTU4MyA1LjcyOTE2NjY3LDcuMjk0ODk1ODMgQzYuNTkwNjI1LDcuMjk0ODk1ODMgNy4yOTE2NjY2Nyw3Ljk5NTkzNzUgNy4yOTE2NjY2Nyw4Ljg1NzM5NTgzIEM3LjI5MTY2NjY3LDkuNzE4ODU0MTcgNi41OTA2MjUsMTAuNDE5ODk1OCA1LjcyOTE2NjY3LDEwLjQxOTg5NTggQzQuODY3NzA4MzMsMTAuNDE5ODk1OCA0LjE2NjY2NjY3LDkuNzE4ODU0MTcgNC4xNjY2NjY2Nyw4Ljg1NzM5NTgzIE04LjMzMzMzMzMzLDguODU3Mzk1ODMgQzguMzMzMzMzMzMsNy40MjA5Mzc1IDcuMTY0NTgzMzMsNi4yNTMyMjkxNyA1LjcyOTE2NjY3LDYuMjUzMjI5MTcgQzQuMjkzNzUsNi4yNTMyMjkxNyAzLjEyNSw3LjQyMDkzNzUgMy4xMjUsOC44NTczOTU4MyBDMy4xMjUsMTAuMjkzODU0MiA0LjI5Mzc1LDExLjQ2MTU2MjUgNS43MjkxNjY2NywxMS40NjE1NjI1IEM3LjE2NDU4MzMzLDExLjQ2MTU2MjUgOC4zMzMzMzMzMywxMC4yOTM4NTQyIDguMzMzMzMzMzMsOC44NTczOTU4MyBNNi4yNSwxNS42MjgyMjkyIEM1LjY3NjA0MTY3LDE1LjYyODIyOTIgNS4yMDgzMzMzMywxNS4xNjE1NjI1IDUuMjA4MzMzMzMsMTQuNTg2NTYyNSBDNS4yMDgzMzMzMywxNC4wMTE1NjI1IDUuNjc2MDQxNjcsMTMuNTQ0ODk1OCA2LjI1LDEzLjU0NDg5NTggQzYuODIzOTU4MzMsMTMuNTQ0ODk1OCA3LjI5MTY2NjY3LDE0LjAxMTU2MjUgNy4yOTE2NjY2NywxNC41ODY1NjI1IEM3LjI5MTY2NjY3LDE1LjE2MTU2MjUgNi44MjM5NTgzMywxNS42MjgyMjkyIDYuMjUsMTUuNjI4MjI5MiBNNi4yNSwxMi41MDMyMjkyIEM1LjEwMTA0MTY3LDEyLjUwMzIyOTIgNC4xNjY2NjY2NywxMy40Mzc2MDQyIDQuMTY2NjY2NjcsMTQuNTg2NTYyNSBDNC4xNjY2NjY2NywxNS43MzU1MjA4IDUuMTAxMDQxNjcsMTYuNjY5ODk1OCA2LjI1LDE2LjY2OTg5NTggQzcuMzk4OTU4MzMsMTYuNjY5ODk1OCA4LjMzMzMzMzMzLDE1LjczNTUyMDggOC4zMzMzMzMzMywxNC41ODY1NjI1IEM4LjMzMzMzMzMzLDEzLjQzNzYwNDIgNy4zOTg5NTgzMywxMi41MDMyMjkyIDYuMjUsMTIuNTAzMjI5MiBNMTAuNDE2NjY2NywxOS43OTQ4OTU4IEM5Ljg0MjcwODMzLDE5Ljc5NDg5NTggOS4zNzUsMTkuMzI4MjI5MiA5LjM3NSwxOC43NTMyMjkyIEM5LjM3NSwxOC4xNzgyMjkyIDkuODQyNzA4MzMsMTcuNzExNTYyNSAxMC40MTY2NjY3LDE3LjcxMTU2MjUgQzEwLjk5MDYyNSwxNy43MTE1NjI1IDExLjQ1ODMzMzMsMTguMTc4MjI5MiAxMS40NTgzMzMzLDE4Ljc1MzIyOTIgQzExLjQ1ODMzMzMsMTkuMzI4MjI5MiAxMC45OTA2MjUsMTkuNzk0ODk1OCAxMC40MTY2NjY3LDE5Ljc5NDg5NTggTTEwLjQxNjY2NjcsMTYuNjY5ODk1OCBDOS4yNjc3MDgzMywxNi42Njk4OTU4IDguMzMzMzMzMzMsMTcuNjA0MjcwOCA4LjMzMzMzMzMzLDE4Ljc1MzIyOTIgQzguMzMzMzMzMzMsMTkuOTAyMTg3NSA5LjI2NzcwODMzLDIwLjgzNjU2MjUgMTAuNDE2NjY2NywyMC44MzY1NjI1IEMxMS41NjU2MjUsMjAuODM2NTYyNSAxMi41LDE5LjkwMjE4NzUgMTIuNSwxOC43NTMyMjkyIEMxMi41LDE3LjYwNDI3MDggMTEuNTY1NjI1LDE2LjY2OTg5NTggMTAuNDE2NjY2NywxNi42Njk4OTU4IE0xOC42NjM1NDE3LDE0LjMyNjE0NTggQzE1Ljc4MzMzMzMsMTQuMzI2MTQ1OCAxNC4zMjI5MTY3LDE2LjEwNzM5NTggMTQuMzIyOTE2NywxOS42MjA5Mzc1IEMxNC4zMjI5MTY3LDIyLjQ5MTc3MDggMTIuMjU2MjUsMjIuOTE5ODk1OCAxMS4wMjM5NTgzLDIyLjkxOTg5NTggQzcuNDQxNjY2NjcsMjIuOTE5ODk1OCAxLjA0MTY2NjY3LDE5LjI2NDY4NzUgMS4wNDE2NjY2NywxMS45ODIzOTU4IEMxLjA0MTY2NjY3LDQuNDY3ODEyNSA2LjcxMTQ1ODMzLDEuMDQ0ODk1ODMgMTEuOTc5MTY2NywxLjA0NDg5NTgzIEMxOC4zMjM5NTgzLDEuMDQ0ODk1ODMgMjIuOTE2NjY2Nyw2LjQzNzYwNDE3IDIyLjkxNjY2NjcsMTAuMDczMDIwOCBDMjIuOTE2NjY2NywxMy42MDMyMjkyIDIxLjIxNjY2NjcsMTQuMzI2MTQ1OCAxOC42NjM1NDE3LDE0LjMyNjE0NTggTTExLjk3OTE2NjcsMC4wMDMyMjkxNjY2NyBDNi4yMDkzNzUsMC4wMDMyMjkxNjY2NyAwLDMuNzUyMTg3NSAwLDExLjk4MjM5NTggQzAsMTkuOTU4NDM3NSA3LjA2NzcwODMzLDIzLjk2MTU2MjUgMTEuMDIzOTU4MywyMy45NjE1NjI1IEMxMy43NDE2NjY3LDIzLjk2MTU2MjUgMTUuMzY0NTgzMywyMi4zMzg2NDU4IDE1LjM2NDU4MzMsMTkuNjIwOTM3NSBDMTUuMzY0NTgzMywxNi42NzkyNzA4IDE2LjM4MjI5MTcsMTUuMzY3ODEyNSAxOC42NjM1NDE3LDE1LjM2NzgxMjUgQzIxLjEyODEyNSwxNS4zNjc4MTI1IDIzLjk1ODMzMzMsMTQuNzY1NzI5MiAyMy45NTgzMzMzLDEwLjA3MzAyMDggQzIzLjk1ODMzMzMsNi4wMTc4MTI1IDE4LjkyODEyNSwwLjAwMzIyOTE2NjY3IDExLjk3OTE2NjcsMC4wMDMyMjkxNjY2NyIvPgogICAgICAgIDwvZz4KICAgICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+Cg=='
-  }
-
-  assetPencil () {
-    return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNyIgaGVpZ2h0PSIyNyIgdmlld0JveD0iMCAwIDI3IDI3Ij4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzcgLTUyODUpIj4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyMSA1MjY3KSI+CiAgICAgIDxnIGZpbGwtcnVsZT0ibm9uemVybyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTcgMTkpIj4KICAgICAgICA8cG9seWdvbiBmaWxsPSIjMkQzNDZBIiBwb2ludHM9IjQuNTUxIDIzLjMwMSAwIDI1IDEuNjkzIDIwLjQ0OSAxLjcwNSAyMC40NTUgNC41NDUgMjMuMjk1Ii8+CiAgICAgICAgPHBvbHlnb24gZmlsbD0iI0ZGRiIgcG9pbnRzPSI3LjAyOCAxNy45NzIgMTAuMjM5IDIxLjE4MiA0LjU1MSAyMy4zMDEgNC41NDUgMjMuMjk1IDEuNzA1IDIwLjQ1NSAxLjY5MyAyMC40NDkgMy44MTggMTQuNzU2Ii8+CiAgICAgICAgPHBhdGggZmlsbD0iI0ZGQzEyRSIgZD0iTTIyLjIyMTU5MDksOS4xOTg4NjM2NCBMMTAuMjI3MjcyNywyMS4xODE4MTgyIEw3LjAxNzA0NTQ1LDE3Ljk3MTU5MDkgTDIxLjAyMjcyNzMsMy45NzcyNzI3MyBMMjQuMjA0NTQ1NSw3LjE1OTA5MDkxIEMyNC4xMDM5MjA0LDcuMjk3MTE5MjUgMjMuOTkxNzc2NSw3LjQyNjM2OTggMjMuODY5MzE4Miw3LjU0NTQ1NDU1IEwyMi4yMjcyNzI3LDkuMjA0NTQ1NDUgTDIyLjIyMTU5MDksOS4xOTg4NjM2NCBaIi8+CiAgICAgICAgPHBhdGggZmlsbD0iI0ZGQzEyRSIgZD0iTTE1LjgwMTEzNjQsMi43Nzg0MDkwOSBMMTcuNDY1OTA5MSwxLjEzNjM2MzY0IEMxNy41ODY5NDk0LDEuMDEzODE0NjQgMTcuNzE4MDk0NiwwLjkwMTY3NjAyMSAxNy44NTc5NTQ1LDAuODAxMTM2MzY0IEwyMS4wMjI3MjczLDMuOTc3MjcyNzMgTDcuMDI4NDA5MDksMTcuOTcxNTkwOSBMMy44MTgxODE4MiwxNC43NzI3MjczIEwxNS44MDExMzY0LDIuNzc4NDA5MDkgWiIvPgogICAgICAgIDxwYXRoIGZpbGw9IiNDM0NDRTkiIGQ9Ik0yNSw0Ljc3ODQwOTA5IEMyNS4wMDgyNDY0LDUuNjI5NjU0NTcgMjQuNzM2NzY3Miw2LjQ2MDA2MTQxIDI0LjIyNzI3MjcsNy4xNDIwNDU0NSBMMjEuMDIyNzI3MywzLjk3NzI3MjczIEwxNy44NTc5NTQ1LDAuNzcyNzI3MjczIEMxOS40NzcyNzI3LC0wLjQ1NDU0NTQ1NSAyMS45MzE4MTgyLC0wLjIwNDU0NTQ1NSAyMy41Mzk3NzI3LDEuNDMxODE4MTggQzI0LjQ1MTM3MzMsMi4zMDkzNDI3NSAyNC45NzY2OTU3LDMuNTEzMjkxNzggMjUsNC43Nzg0MDkwOSBaIi8+CiAgICAgICAgPHBhdGggZmlsbD0iIzJEMzQ2QSIgZD0iTTE1LjU4NzA1ODgsMi4xOTQ2MzgwOCBDMTUuODA5MDUxMywxLjk3Mjg1Mjk0IDE2LjE2ODgwNCwxLjk3MzAyMDk3IDE2LjM5MDU4OTIsMi4xOTUwMTMzOSBDMTYuNTk1MzEzOSwyLjM5OTkyOTQ3IDE2LjYxMDkxODgsMi43MjIyMjcxNiAxNi40Mzc1MDUxLDIuOTQ1MDM4OTIgTDE2LjM5MDIxMzksMi45OTg1NDM3MyBMNC42MjE1OTA5MSwxNC43NTU2ODE4IEwxMC4yMzg2MzY0LDIwLjM3Nzg0MDkgTDIyLjAwMTU1MDEsOC42MDk2OTIyNCBDMjIuMjA2MzIyNyw4LjQwNDgyMzk5IDIyLjUyODYwOTQsOC4zODg5OTMzMiAyMi43NTE1NDI2LDguNTYyMjUwODcgTDIyLjgwNTA4MDUsOC42MDk1MDQ2MyBDMjMuMDA5OTQ4Nyw4LjgxNDI3NzIzIDIzLjAyNTc3OTQsOS4xMzY1NjM5MiAyMi44NTI1MjE5LDkuMzU5NDk3MTEgTDIyLjgwNTI2ODEsOS40MTMwMzUwNCBMMTAuNjQwNDk1NCwyMS41ODM0ODk2IEMxMC40MzU2MjQ5LDIxLjc4ODQ1NTcgMTAuMTEzMTUyMiwyMS44MDQxOTAzIDkuODkwMjI1NjEsMjEuNjMwNzE2MSBMOS44MzY2OTM0OSwyMS41ODM0MDU3IEwzLjQxNjIzODk1LDE1LjE1NzI2OTMgQzMuMjExNTA1NTMsMTQuOTUyMzU0NyAzLjE5NTg5NjE5LDE0LjYzMDA1MDYgMy4zNjkzMTIzLDE0LjQwNzIzNDggTDMuNDE2NjA0MywxNC4zNTM3MjkgTDE1LjU4NzA1ODgsMi4xOTQ2MzgwOCBaIi8+CiAgICAgICAgPHBhdGggZmlsbD0iIzJEMzQ2QSIgZD0iTTE3LjA2NDE0MzkuNzM0NTk4NDJDMTguODkxODgyNi0xLjA5MzE0MDM0IDIxLjk4MzM1NTctLjkyODEyOTIzNiAyMy45Njk5NDcgMS4wNTg0NjIwNiAyNS45MTY4ODI5IDMuMDA1Mzk3OTYgMjYuMTE0NDI3NyA2LjAxMzkwMDIzIDI0LjM5OTE0NjYgNy44NDk3MzE4MkwyNC4yOTE3MzggNy45NjA2NDU0NSAyMi42MjY5NjUyIDkuNjA4MzcyNzNDMjIuNDAzOTM3NiA5LjgyOTExNjgxIDIyLjA0NDE4OTUgOS44MjcyNjU2MiAyMS44MjM0NDU1IDkuNjA0MjM3OTggMjEuNjE5NjgxNyA5LjM5ODM2NjMxIDIxLjYwNTU4NDkgOS4wNzU5OTkxMyAyMS43ODAwMzkxIDguODU0MDAxMTVMMjEuODI3NTgwMiA4LjgwMDcxODE4IDIzLjQ5MDk5NyA3LjE1NDMzNzQ1QzI0Ljg1Mzg0MDggNS43OTYzNDM2NSAyNC43MjcwNTk3IDMuNDIyNjM1NjMgMjMuMTY2NDE2NiAxLjg2MTk5MjQ5IDIxLjY0MTg5NDUuMzM3NDcwMzk3IDE5LjM0MTM0ODQuMTgxMTE0Mzc0IDE3Ljk2MTg0OTkgMS40NDc5Njk3M0wxNy44NjQ5MDM2IDEuNTQwODgwNTcgMTYuMjAwMTMwOSAzLjE4MjkyNjAzQzE1Ljk3NjcyMjMgMy40MDMyODQ2MiAxNS42MTY5NzggMy40MDA4MTIxNSAxNS4zOTY2MTk0IDMuMTc3NDAzNjEgMTUuMTkzMjExNSAyLjk3MTE4MDM1IDE1LjE3OTY3MTUgMi42NDg3ODkzMSAxNS4zNTQ1MDg4IDIuNDI3MDkyOTRMMTUuNDAyMTQxOCAyLjM3Mzg5MjE2IDE3LjA2NDE0MzkuNzM0NTk4NDJ6TTMuMjg1Nzc3MjIgMTQuNTU3MjQ4MkMzLjM5NTM2OTEgMTQuMjYzMjA5MiAzLjcyMjU3NjU0IDE0LjExMzY4NTMgNC4wMTY2MTU0OCAxNC4yMjMyNzcyIDQuMjg5NjUxNjQgMTQuMzI1MDQxMSA0LjQzODA4MDQzIDE0LjYxNDQ0MjkgNC4zNzAxNDYxIDE0Ljg5MDY5MDhMNC4zNTA1ODY0MiAxNC45NTQxMTU1Ljk2NjQ3NzI3MyAyNC4wMzI5NTQ1IDEwLjA0MDEwNiAyMC42NDk0NDk2QzEwLjMxMzEyMzcgMjAuNTQ3NjM2MSAxMC42MTQ3ODEzIDIwLjY2OTIzODcgMTAuNzQ0MjcwNSAyMC45MjI1MzgxTDEwLjc3MTAwNDkgMjAuOTgzMjg3OEMxMC44NzI4MTg0IDIxLjI1NjMwNTUgMTAuNzUxMjE1OCAyMS41NTc5NjMxIDEwLjQ5NzkxNjUgMjEuNjg3NDUyM0wxMC40MzcxNjY3IDIxLjcxNDE4NjcuMTk4NTMwMzM5IDI1LjUzMjM2ODZDLS4yMzc3NDMwMDcgMjUuNjk1MDYzMi0uNjYzNzA4NzM0IDI1LjI5NTIxMzQtLjU1MTE0MjIwMiAyNC44NjA5NDgxTC0uNTMyNDA0NjAyIDI0LjgwMTU2NjMgMy4yODU3NzcyMiAxNC41NTcyNDgyeiIvPgogICAgICAgIDxwYXRoIGZpbGw9IiMyRDM0NkEiIGQ9Ik0xLjMwMjc4MDI0LDIwLjA1Mjc4MDIgQzEuNTA3NjAwNjcsMTkuODQ3OTU5OCAxLjgyOTg5MTA0LDE5LjgzMjIwNDQgMi4wNTI3ODM3NywyMC4wMDU1MTQgTDIuMTA2MzEwNjcsMjAuMDUyNzgwMiBMNC45NDcyMTk3NiwyMi44OTM2ODkzIEM1LjE2OTEwODU2LDIzLjExNTU3ODEgNS4xNjkxMDg1NiwyMy40NzUzMzEgNC45NDcyMTk3NiwyMy42OTcyMTk4IEM0Ljc0MjM5OTMzLDIzLjkwMjA0MDIgNC40MjAxMDg5NiwyMy45MTc3OTU2IDQuMTk3MjE2MjMsMjMuNzQ0NDg2IEw0LjE0MzY4OTMzLDIzLjY5NzIxOTggTDEuMzAyNzgwMjQsMjAuODU2MzEwNyBDMS4wODA4OTE0NCwyMC42MzQ0MjE5IDEuMDgwODkxNDQsMjAuMjc0NjY5IDEuMzAyNzgwMjQsMjAuMDUyNzgwMiBaIi8+CiAgICAgICAgPHBvbHlnb24gZmlsbD0iIzJEMzQ2QSIgcG9pbnRzPSIxOC4yNiAuMzcxIDI0LjY1MiA2Ljc2MyAyMy44NDggNy41NjcgMTcuNDU2IDEuMTc0Ii8+CiAgICAgICAgPHBhdGggZmlsbD0iIzJEMzQ2QSIgZD0iTTIwLjY0Mzc3MDgsMy41NTgzODA2MiBDMjAuODY1NzA0NiwzLjMzNjUzNjggMjEuMjI1NDU3NCwzLjMzNjYwOTczIDIxLjQ0NzMwMTIsMy41NTg1NDM1MSBDMjEuNjUyMDgwMSwzLjc2MzQwNTQ2IDIxLjY2Nzc3MDIsNC4wODU2OTkwMiAyMS40OTQ0MTU0LDQuMzA4NTU2NjEgTDIxLjQ0NzEzODMsNC4zNjIwNzM5MyBMNy40MzAwOTI4NSwxOC4zNzM0Mzc2IEM3LjIwODE1OTA4LDE4LjU5NTI4MTQgNi44NDg0MDYyNiwxOC41OTUyMDg1IDYuNjI2NTYyNDQsMTguMzczMjc0NyBDNi40MjE3ODM1MywxOC4xNjg0MTI3IDYuNDA2MDkzNDUsMTcuODQ2MTE5MiA2LjU3OTQ0ODIyLDE3LjYyMzI2MTYgTDYuNjI2NzI1MzMsMTcuNTY5NzQ0MyBMMjAuNjQzNzcwOCwzLjU1ODM4MDYyIFoiLz4KICAgICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+Cg=='
-  }
-
-  assetEraser () {
-    return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzEgLTU1MDIpIj4KICAgIDxyZWN0IHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjYwNDciIGZpbGw9IiNGQkZCRkEiLz4KICAgIDxyZWN0IHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjEwNTEiIHg9IjEiIHk9IjQ2MDMiIGZpbGw9IiNGQkZCRkEiLz4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyMSA1MjY3KSI+CiAgICAgIDxyZWN0IHdpZHRoPSI1OSIgaGVpZ2h0PSIyODQiIHg9Ii41IiB5PSIuNSIgZmlsbD0iI0U1RTZFOCIgc3Ryb2tlPSIjNTk2MjcwIiBzdHJva2Utb3BhY2l0eT0iLjM2NyIvPgogICAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMCAyMzUpIj4KICAgICAgICA8cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiLz4KICAgICAgICA8ZyBmaWxsLXJ1bGU9Im5vbnplcm8iIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcgOCkiPgogICAgICAgICAgPHBhdGggZmlsbD0iI0ZGMkM1NSIgZD0iTTQuOTgsMTIuOTgzNiBMMC45MTcsMTcuMTg2NiBDMC4zNjEsMTcuNzYwNiAwLjM2MSwxOC42ODk2IDAuOTE3LDE5LjI2MzYgTDQuMDQ4LDIyLjUwMzYgTDkuOTU2LDIyLjUwMzYgTDEyLjE4OSwyMC4xOTI2IEw0Ljk4LDEyLjk4MzYgWiIvPgogICAgICAgICAgPHBvbHlnb24gZmlsbD0iI0ZDMCIgcG9pbnRzPSIxNi41IC41MDMgMjQuNSA4LjUwMyAxMi41IDIwLjUwMyA0LjUgMTIuNTAzIi8+CiAgICAgICAgICA8cGF0aCBmaWxsPSIjMDAwIiBkPSJNMTIuNSwxOS43OTYxIEw1LjIwNywxMi41MDMxIEwxNi41LDEuMjEwMSBMMjMuNzkzLDguNTAzMSBMMTIuNSwxOS43OTYxIFogTTkuNzQ0LDIyLjAwMzEgTDQuMjYsMjIuMDAzMSBMMS4yNzYsMTguOTE2MSBDMC45MDgsMTguNTM1MSAwLjkwOCwxNy45MTUxIDEuMjc2LDE3LjUzNDEgTDQuOTg2LDEzLjY5NjEgTDExLjQ4OCwyMC4xOTgxIEw5Ljc0NCwyMi4wMDMxIFogTTE2Ljg1NCwwLjE1MDEgQzE2LjY1OCwtMC4wNDU5IDE2LjM0MiwtMC4wNDU5IDE2LjE0NiwwLjE1MDEgTDQuMTQ2LDEyLjE1MDEgQzMuOTUxLDEyLjM0NTEgMy45NTEsMTIuNjYxMSA0LjE0NiwxMi44NTcxIEw0LjI3OSwxMi45ODkxIEwwLjU1NywxNi44MzkxIEMtMC4xODIsMTcuNjA0MSAtMC4xODIsMTguODQ3MSAwLjU1NywxOS42MTExIEwyLjg2OSwyMi4wMDMxIEwwLjUsMjIuMDAzMSBDMC4yMjQsMjIuMDAzMSAwLDIyLjIyNzEgMCwyMi41MDMxIEMwLDIyLjc3OTEgMC4yMjQsMjMuMDAzMSAwLjUsMjMuMDAzMSBMNC4wNDgsMjMuMDAzMSBMOS45NTYsMjMuMDAzMSBMMTYuNSwyMy4wMDMxIEMxNi43NzYsMjMuMDAzMSAxNywyMi43NzkxIDE3LDIyLjUwMzEgQzE3LDIyLjIyNzEgMTYuNzc2LDIyLjAwMzEgMTYuNSwyMi4wMDMxIEwxMS4xMzQsMjIuMDAzMSBMMTIuMjA1LDIwLjg5NjEgQzEyLjI5MywyMC45NjIxIDEyLjM5NSwyMS4wMDMxIDEyLjUsMjEuMDAzMSBDMTIuNjI4LDIxLjAwMzEgMTIuNzU2LDIwLjk1NDEgMTIuODU0LDIwLjg1NzEgTDI0Ljg1NCw4Ljg1NzEgQzI1LjA0OSw4LjY2MTEgMjUuMDQ5LDguMzQ1MSAyNC44NTQsOC4xNTAxIEwxNi44NTQsMC4xNTAxIFoiLz4KICAgICAgICAgIDxwYXRoIGZpbGw9IiMwMDAiIGQ9Ik0yMy44NTM1LDcuMTQ5NiBDMjMuNjU4NSw2Ljk1NDYgMjMuMzQxNSw2Ljk1NDYgMjMuMTQ2NSw3LjE0OTYgTDExLjQ5NTUsMTguODAwNiBDMTEuNDExNSwxOC43NDE2IDExLjMxMDUsMTguNzA5NiAxMS4yMDY1LDE4LjcwOTYgQzExLjEwMTUsMTguNzA5NiAxMC45NDA1LDE4Ljc2MzYgMTAuODQ2NSwxOC44NjE2IEw5Ljc0MzUsMjAuMDAzNiBMNC4yNTk1LDIwLjAwMzYgTDEuMzA4NSwxNi45NTE2IEMxLjI5MjUsMTYuOTI3NiAxLjI3NTUsMTYuOTA0NiAxLjI1OTUsMTYuODg3NiBDMS4xNjU1LDE2Ljc4NDYgMS4wMzE1LDE2LjcyNTYgMC44OTE1LDE2LjcyNTYgTDAuODkwNSwxNi43MjU2IEMwLjc0OTUsMTYuNzI1NiAwLjYxNTUsMTYuNzg1NiAwLjUyMTUsMTYuODg5NiBDLTAuMTgzNSwxNy42Njc2IC0wLjE2NzUsMTguODYyNiAwLjU1NjUsMTkuNjExNiBMMy42ODg1LDIyLjg1MDYgQzMuNzgyNSwyMi45NDg2IDMuOTEyNSwyMy4wMDM2IDQuMDQ3NSwyMy4wMDM2IEw5Ljk1NTUsMjMuMDAzNiBDMTAuMDkwNSwyMy4wMDM2IDEwLjIyMDUsMjIuOTQ4NiAxMC4zMTQ1LDIyLjg1MDYgTDEyLjE5OTUsMjAuOTAyNiBDMTIuMzkxNSwyMS4wNDk2IDEyLjY3NDUsMjEuMDM1NiAxMi44NTM1LDIwLjg1NjYgTDI0Ljg1MzUsOC44NTY2IEMyNS4wNDg1LDguNjYxNiAyNS4wNDg1LDguMzQ0NiAyNC44NTM1LDguMTQ5NiBMMjMuODUzNSw3LjE0OTYgWiIgb3BhY2l0eT0iLjEyIi8+CiAgICAgICAgPC9nPgogICAgICA8L2c+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K'
-  }
-
-  assetSize (size) {
-    switch (size) {
-      case 1:
-        // return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzEgLTU1MDIpIj4KICAgIDxyZWN0IHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjYwNDciIGZpbGw9IiNGQkZCRkEiLz4KICAgIDxyZWN0IHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjEwNTEiIHg9IjEiIHk9IjQ2MDMiIGZpbGw9IiNGQkZCRkEiLz4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyMSA1MjY3KSI+CiAgICAgIDxyZWN0IHdpZHRoPSI1OSIgaGVpZ2h0PSIyODQiIHg9Ii41IiB5PSIuNSIgZmlsbD0iI0U1RTZFOCIgc3Ryb2tlPSIjNTk2MjcwIiBzdHJva2Utb3BhY2l0eT0iLjM2NyIgaWQ9InNtYWxsU3Ryb2tlIi8+CiAgICAgIDxyZWN0IHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAgMjM1KSIvPgogICAgICA8cmVjdCB3aWR0aD0iNyIgaGVpZ2h0PSI3IiB4PSIyNiIgeT0iMjUyIiBmaWxsPSIjNTk2MjcwIiBpZD0ic21hbGxGaWxsIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K'
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" id="size1" class="toolSelected"><g fill="none" fill-rule="evenodd" transform="translate(-231 -5502)"><rect width="1440" height="6047" fill="#FBFBFA"/><rect width="1440" height="1051" x="1" y="4603" fill="#FBFBFA"/><g transform="translate(221 5267)"><rect width="59" height="284" x=".5" y=".5" fill="#E5E6E8" stroke="#596270" stroke-opacity=".367" id="smallStroke"/><rect width="40" height="40" transform="translate(10 235)"/><rect width="7" height="7" x="26" y="252" fill="#596270" id="smallFill"/></g></g></svg>`;
-        break
-      case 2:
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" id="size2"><g fill="none" fill-rule="evenodd" transform="translate(-231 -5502)"><rect width="1440" height="6047" fill="#FBFBFA"/><rect width="1440" height="1051" x="1" y="4603" fill="#FBFBFA"/><g transform="translate(221 5267)"><rect width="59" height="284" x=".5" y=".5" fill="#E5E6E8" stroke="#596270" stroke-opacity=".367" id="mediumStroke"/><rect width="40" height="40" transform="translate(10 235)"/><rect width="12" height="12" x="24" y="250" fill="#596270" id="mediumFill"/></g></g></svg>`
-        break
-      case 3:
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" id="size3"><g fill="none" fill-rule="evenodd" transform="translate(-231 -5502)"><rect width="1440" height="6047" fill="#FBFBFA"/><rect width="1440" height="1051" x="1" y="4603" fill="#FBFBFA"/><g transform="translate(221 5267)"><rect width="59" height="284" x=".5" y=".5" fill="#E5E6E8" stroke="#596270" stroke-opacity=".367" id="largeStroke"/><rect width="40" height="40" transform="translate(10 235)"/><rect width="20" height="20" x="20" y="246" fill="#596270" id="largeFill"/></g></g></svg>`
+  asset (name) {
+    switch (name) {
+      case 'size1':
+        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="#FFF" d="M0 0h100v100H0z"/><path fill="currentColor" d="M38 38h25v25H38z"/></g></svg>'
+      case 'size2':
+        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="#FFF" d="M0 0h100v100H0z"/><path fill="currentColor" d="M30 30h40v40H30z"/></g></svg>'
+      case 'size3':
+        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="#FFF" d="M0 0h100v100H0z"/><path fill="currentColor" d="M23 23h55v55H23z"/></g></svg>'
+      case 'color':
+        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="#FFF" d="M0 0h100v100H0z"/><g fill-rule="nonzero"><path d="M16.52 49.949c0-22.28 16.71-33.42 33.42-33.42 19.495 0 33.42 16.71 33.42 27.85 0 11.139-5.57 13.925-13.925 13.925s-11.14 5.569-11.14 13.924-5.57 11.14-11.142 11.14c-11.138 0-30.634-11.14-30.634-33.42" fill="#FFF"/><path d="M49.94 69.697a4.557 4.557 0 11-9.115 0 4.557 4.557 0 019.114 0" fill="#4CD964"/><path d="M37.786 57.544a4.557 4.557 0 11-9.114 0 4.557 4.557 0 019.114 0" fill="#339EFF"/><path d="M37.786 40.834a6.079 6.079 0 01-6.076 6.076 6.079 6.079 0 01-6.076-6.076 6.079 6.079 0 016.076-6.076 6.079 6.079 0 016.076 6.076" fill="#FC0"/><path d="M56.016 31.72a6.079 6.079 0 01-6.077 6.076 6.079 6.079 0 01-6.076-6.077 6.079 6.079 0 016.076-6.076 6.079 6.079 0 016.077 6.076" fill="#FF2C55"/><path d="M74.245 40.834a6.079 6.079 0 01-6.077 6.076 6.079 6.079 0 01-6.076-6.076 6.079 6.079 0 016.076-6.076 6.079 6.079 0 016.077 6.076" fill="#7F2EFF"/><path d="M72.726 40.834a4.563 4.563 0 01-4.558 4.557 4.563 4.563 0 01-4.557-4.557 4.563 4.563 0 014.557-4.557 4.563 4.563 0 014.558 4.557m-12.153 0c0 4.19 3.409 7.596 7.595 7.596 4.187 0 7.596-3.406 7.596-7.596 0-4.19-3.409-7.595-7.596-7.595-4.186 0-7.595 3.405-7.595 7.595m-10.634-4.557a4.563 4.563 0 01-4.557-4.558 4.563 4.563 0 014.557-4.557 4.563 4.563 0 014.558 4.557 4.563 4.563 0 01-4.558 4.558m0-12.153c-4.186 0-7.595 3.406-7.595 7.595 0 4.19 3.409 7.596 7.595 7.596 4.187 0 7.596-3.406 7.596-7.596 0-4.19-3.41-7.595-7.596-7.595m-22.786 16.71a4.563 4.563 0 014.557-4.557 4.563 4.563 0 014.557 4.557 4.563 4.563 0 01-4.557 4.557 4.563 4.563 0 01-4.557-4.557m12.153 0c0-4.19-3.41-7.595-7.596-7.595-4.187 0-7.595 3.405-7.595 7.595 0 4.19 3.408 7.596 7.595 7.596 4.187 0 7.596-3.406 7.596-7.596m-6.077 19.748a3.041 3.041 0 01-3.038-3.038 3.041 3.041 0 013.038-3.038 3.041 3.041 0 013.038 3.038 3.041 3.041 0 01-3.038 3.038m0-9.114a6.083 6.083 0 00-6.076 6.076 6.083 6.083 0 006.076 6.077 6.083 6.083 0 006.077-6.077 6.083 6.083 0 00-6.077-6.076m12.153 21.267a3.041 3.041 0 01-3.038-3.038 3.041 3.041 0 013.038-3.038 3.041 3.041 0 013.038 3.038 3.041 3.041 0 01-3.038 3.038m0-9.114a6.083 6.083 0 00-6.076 6.076 6.083 6.083 0 006.076 6.076 6.083 6.083 0 006.076-6.076 6.083 6.083 0 00-6.076-6.076m24.053-6.836c-8.4 0-12.66 5.195-12.66 15.443 0 8.373-6.028 9.622-9.622 9.622-10.448 0-29.115-10.661-29.115-31.901 0-21.918 16.537-31.901 31.901-31.901 18.506 0 31.901 15.728 31.901 26.332 0 10.296-4.958 12.405-12.405 12.405M49.94 15.009C33.111 15.01 15 25.944 15 49.95c0 23.263 20.614 34.939 32.153 34.939 7.927 0 12.66-4.734 12.66-12.66 0-8.58 2.969-12.405 9.622-12.405 7.189 0 15.443-1.756 15.443-15.443 0-11.828-14.671-29.37-34.939-29.37" fill="#2D346A"/></g></g></svg>'
+      case 'pencil':
+        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="#FFF" d="M0 0h100v100H0z"/><g fill-rule="nonzero"><path fill="#2D346A" d="M29.392 78.003l-11.8 4.404 4.39-11.799.03.015 7.365 7.365z"/><path fill="#FFF" d="M35.814 64.186l8.323 8.322-14.745 5.495-.015-.015-7.365-7.365-.03-.015 5.51-14.76z"/><path d="M75.204 41.441L44.108 72.508l-8.323-8.322 36.311-36.282 8.25 8.25c-.262.357-.553.692-.87 1l-4.257 4.302-.015-.015z" fill="#FFC12E"/><path d="M58.559 24.796l4.316-4.257a7.955 7.955 0 011.016-.87l8.205 8.235-36.282 36.282-8.322-8.294 31.067-31.096z" fill="#FFC12E"/><path d="M82.407 29.981a10.076 10.076 0 01-2.003 6.128l-8.308-8.205-8.205-8.308c4.198-3.182 10.562-2.534 14.73 1.709a12.359 12.359 0 013.786 8.676z" fill="#C3CCE9"/><g fill="#2D346A"><path d="M58.003 23.282a1.473 1.473 0 012.205 1.946l-.122.139-30.512 30.481 14.563 14.576 30.497-30.51a1.473 1.473 0 011.944-.123l.139.123c.531.53.572 1.366.123 1.944l-.123.139L45.18 73.55a1.473 1.473 0 01-1.945.122l-.139-.122L26.45 56.89a1.473 1.473 0 01-.122-1.945l.122-.139 31.553-31.524z"/><path d="M61.833 19.497c4.739-4.738 12.753-4.31 17.904.84 5.048 5.047 5.56 12.847 1.113 17.607l-.279.287-4.316 4.272a1.473 1.473 0 01-2.196-1.956l.124-.138 4.312-4.268c3.533-3.52 3.205-9.675-.841-13.721-3.953-3.952-9.917-4.358-13.494-1.073l-.251.24-4.316 4.258a1.473 1.473 0 01-2.192-1.96l.123-.138 4.309-4.25zM26.111 55.334a1.473 1.473 0 012.812.864l-.051.165L20.098 79.9l23.524-8.772a1.473 1.473 0 011.826.708l.07.158a1.473 1.473 0 01-.709 1.825l-.157.07-26.545 9.899c-1.13.421-2.235-.615-1.943-1.741l.048-.154 9.9-26.56z"/><path d="M20.97 69.581a1.473 1.473 0 011.945-.122l.138.122 7.366 7.366a1.473 1.473 0 01-1.945 2.205l-.139-.122-7.365-7.365a1.473 1.473 0 010-2.084zM64.933 18.554l16.572 16.572-2.084 2.084L62.85 20.638z"/><path d="M71.113 26.818a1.473 1.473 0 012.206 1.945l-.123.139-36.34 36.325a1.473 1.473 0 01-2.206-1.944l.123-.14 36.34-36.325z"/></g></g></g></svg>'
+      case 'erase':
+        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path fill="#FFF" d="M0 0h100v100H0z"/><g fill-rule="nonzero"><path d="M28.944 54.354L17.568 66.122c-1.557 1.608-1.557 4.209 0 5.816l8.766 9.072h16.543l6.252-6.47-20.185-20.186z" fill="#FF2C55"/><path fill="#FC0" d="M61.2 19.409l22.4 22.4-33.6 33.6-22.4-22.4z"/><path d="M50 73.43L29.58 53.008l31.62-31.62 20.42 20.42L50 73.429zm-7.717 6.179H26.928l-8.355-8.644a2.808 2.808 0 010-3.87L28.96 56.35l18.205 18.206-4.883 5.054zM62.191 18.42a1.4 1.4 0 00-1.982 0l-33.6 33.6a1.401 1.401 0 000 1.98l.372.37L16.56 65.15c-2.07 2.141-2.07 5.622 0 7.761l6.473 6.698H16.4a1.4 1.4 0 000 2.8h44.8a1.4 1.4 0 000-2.8H46.175l2.999-3.1c.246.185.532.3.826.3.358 0 .717-.138.991-.41l33.6-33.6a1.401 1.401 0 000-1.979l-22.4-22.4z" fill="#000"/><path d="M81.79 38.019a1.401 1.401 0 00-1.98 0L47.187 70.642a1.408 1.408 0 00-.809-.255c-.294 0-.745.151-1.008.425l-3.088 3.198H26.927l-8.263-8.546a1.397 1.397 0 00-1.168-.633h-.003c-.394 0-.77.169-1.033.46-1.974 2.178-1.929 5.524.098 7.621l8.77 9.07c.263.274.627.428 1.005.428h16.542c.378 0 .742-.154 1.006-.428l5.278-5.455c.537.412 1.33.373 1.83-.129l33.6-33.6a1.401 1.401 0 000-1.98l-2.8-2.8z" fill="#000" opacity=".12"/></g></g></svg>'
       default:
         return null
     }
