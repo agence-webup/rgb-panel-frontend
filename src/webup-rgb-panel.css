@@ -29,6 +29,7 @@
 }
 
 .rgbpanel__tools {
+  flex-shrink: 0;
   padding: .8rem;
   width: 6rem;
   border: 1px solid rgba(89,98,112,.37);
@@ -46,6 +47,7 @@
 -------------------------------------------------------------- */
 
 .rgbpanel__tools button {
+  display: block;
   margin-bottom: .3rem;
   padding: 0;
   border: 2px solid transparent;
@@ -53,6 +55,10 @@
   box-shadow: none;
   line-height: 0;
   cursor: pointer;
+}
+
+.rgbpanel__tools button svg {
+  width: 100%;
 }
 
 .rgbpanel__tools button.toolSelected {
