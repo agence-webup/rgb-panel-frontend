@@ -57,8 +57,6 @@
       this.thicknessPanelVisible = false;
       this.rgbWrapper = document.getElementById('webup_rgb');
       this.canvas = this.panelId;
-      this.sendButton = document.getElementById(sendButtonId);
-      this.clearButton = document.getElementById(clearButtonId);
       this.ui = {
         btnSize1: document.createElement('button'),
         btnSize2: document.createElement('button'),
@@ -173,17 +171,12 @@
         this.ui.btnColor.addEventListener('click', function () {
           _this.ui.inputColor.click();
         });
-        this.sendButton.addEventListener('click', function () {
-          _this.send();
-        });
-        this.clearButton.addEventListener('click', function () {
-          _this.init();
-        });
       }
     }, {
       key: "init",
       value: function init() {
         this.setColor(this.color);
+        this.resetCurrent();
         this.ui.btnSize2.classList.add(CSS.toolSelected);
         this.ui.btnPencil.classList.add(CSS.toolSelected); // reset matrix just in case
 
@@ -202,11 +195,16 @@
         this.drawCanvas();
       }
     }, {
-      key: "setThickness",
-      value: function setThickness(thickness) {
+      key: "resetCurrent",
+      value: function resetCurrent() {
         this.ui.btnSize1.classList.remove(CSS.toolSelected);
         this.ui.btnSize2.classList.remove(CSS.toolSelected);
         this.ui.btnSize3.classList.remove(CSS.toolSelected);
+      }
+    }, {
+      key: "setThickness",
+      value: function setThickness(thickness) {
+        this.resetCurrent();
 
         switch (thickness) {
           case 1:
@@ -347,6 +345,11 @@
         } else {
           this.drawCanvas();
         }
+      }
+    }, {
+      key: "clear",
+      value: function clear() {
+        this.init();
       }
     }, {
       key: "sendDrawing",

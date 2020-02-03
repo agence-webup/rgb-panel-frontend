@@ -24,20 +24,26 @@
         <canvas id="panel" width="832" height="416" class="rgbpanel__canvas" data-rgbpanel></canvas>
     </div>
     <div class="ma">
-      <button id="send">Envoyer</button>
-      <button id="clear">Effacer</button>
+      <button data-send>Envoyer</button>
+      <button data-clear>Effacer</button>
     </div>
     <script src="webup-rgb-panel.js"></script>
     <script>
-        new WebupRGBPanel(
+        let webupRGBPanel = new WebupRGBPanel(
             document.querySelector('[data-rgbpanel]'), 
             document.querySelector('[data-rgbpanel-tools]'), 
             64, 
             32, 
-            "http://104.248.134.205:3000", 
-            'send', 
-            'clear'
+            "http://104.248.134.205:3000"
         )
+
+        document.querySelector('[data-send]').addEventListener('click', () => {
+            webupRGBPanel.send()
+        })
+
+        document.querySelector('[data-clear]').addEventListener('click', () => {
+            webupRGBPanel.clear()
+        })
     </script>
 </body>
 </html>

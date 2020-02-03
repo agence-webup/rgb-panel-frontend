@@ -18,8 +18,6 @@ export default class WebupRgbPanel {
     this.thicknessPanelVisible = false
     this.rgbWrapper = document.getElementById('webup_rgb')
     this.canvas = this.panelId
-    this.sendButton = document.getElementById(sendButtonId)
-    this.clearButton = document.getElementById(clearButtonId)
 
     this.ui = {
       btnSize1: document.createElement('button'),
@@ -145,18 +143,11 @@ export default class WebupRgbPanel {
     this.ui.btnColor.addEventListener('click', () => {
       this.ui.inputColor.click()
     })
-
-    this.sendButton.addEventListener('click', () => {
-      this.send()
-    })
-
-    this.clearButton.addEventListener('click', () => {
-      this.init()
-    })
   }
 
   init () {
     this.setColor(this.color)
+    this.resetCurrent()
     this.ui.btnSize2.classList.add(CSS.toolSelected)
     this.ui.btnPencil.classList.add(CSS.toolSelected)
 
@@ -177,10 +168,14 @@ export default class WebupRgbPanel {
     this.drawCanvas()
   }
 
-  setThickness (thickness) {
+  resetCurrent () {
     this.ui.btnSize1.classList.remove(CSS.toolSelected)
     this.ui.btnSize2.classList.remove(CSS.toolSelected)
     this.ui.btnSize3.classList.remove(CSS.toolSelected)
+  }
+
+  setThickness (thickness) {
+    this.resetCurrent()
 
     switch (thickness) {
       case 1:
@@ -332,6 +327,10 @@ export default class WebupRgbPanel {
     } else {
       this.drawCanvas()
     }
+  }
+
+  clear () {
+    this.init()
   }
 
   sendDrawing () {
