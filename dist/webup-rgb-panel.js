@@ -1,5 +1,5 @@
 /*!
- * WebupRGBPanel v2.0.3
+ * WebupRGBPanel v3.0.1
  * (c) 2016-2020 Agence Webup
  * Released under the MIT License.
  */
@@ -254,7 +254,7 @@
               ctx.strokeRect(x, y, 13, 13);
               ctx.fillStyle = '#5A5A5A';
               ctx.fillRect(x + 1, y + 1, 12, 12);
-              ctx.fillStyle = this.matrix[i][j] == '#000' ? '#CACACA' : this.matrix[i][j];
+              ctx.fillStyle = this.matrix[i][j] === '#000' ? '#CACACA' : this.matrix[i][j];
               ctx.fillRect(x2, y2, 8, 8); // bump up x coordinates for next iteration
 
               y += 13;
@@ -306,7 +306,7 @@
             xCoords.push(pixelX - 1);
           }
 
-          if (pixelY + 1 <= this.width - 1) {
+          if (pixelY + 1 <= this.height - 1) {
             yCoords.push(pixelY + 1);
           }
         }

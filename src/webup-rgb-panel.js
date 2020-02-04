@@ -229,7 +229,7 @@ export default class WebupRgbPanel {
           ctx.strokeRect(x, y, 13, 13)
           ctx.fillStyle = '#5A5A5A'
           ctx.fillRect(x + 1, y + 1, 12, 12)
-          ctx.fillStyle = this.matrix[i][j] == '#000' ? '#CACACA' : this.matrix[i][j]
+          ctx.fillStyle = this.matrix[i][j] === '#000' ? '#CACACA' : this.matrix[i][j]
           ctx.fillRect(x2, y2, 8, 8)
 
           // bump up x coordinates for next iteration
@@ -287,7 +287,7 @@ export default class WebupRgbPanel {
         xCoords.push(pixelX - 1)
       }
 
-      if (pixelY + 1 <= this.width - 1) {
+      if (pixelY + 1 <= this.height - 1) {
         yCoords.push(pixelY + 1)
       }
     }
