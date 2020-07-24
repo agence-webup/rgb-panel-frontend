@@ -1,5 +1,5 @@
 /*!
- * WebupRGBPanel v3.0.3
+ * WebupRGBPanel v3.0.4
  * (c) 2016-2020 Agence Webup
  * Released under the MIT License.
  */

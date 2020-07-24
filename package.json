@@ -1,6 +1,6 @@
 {
   "name": "@agence-webup/rgb-panel-frontend",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Frontend for the RGB Panel project.",
   "main": "index.js",
   "module": "dist/webup-rgb-panel.esm.js",
