@@ -3,6 +3,8 @@
   "version": "3.0.2",
   "description": "Frontend for the RGB Panel project.",
   "main": "index.js",
+  "module": "dist/webup-rgb-panel.min.js",
+  "style": "dist/webup-rgb-panel.min.css",
   "scripts": {
     "clean": "rimraf dist",
     "prefix": "postcss src/webup-rgb-panel.css --use=autoprefixer --output=dist/webup-rgb-panel.css",
