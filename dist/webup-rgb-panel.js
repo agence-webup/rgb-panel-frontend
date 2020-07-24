@@ -1,5 +1,5 @@
 /*!
- * WebupRGBPanel v3.0.1
+ * WebupRGBPanel v3.0.3
  * (c) 2016-2020 Agence Webup
  * Released under the MIT License.
  */
@@ -36,9 +36,7 @@
     toolSelected: 'toolSelected'
   };
 
-  var WebupRgbPanel =
-  /*#__PURE__*/
-  function () {
+  var WebupRgbPanel = /*#__PURE__*/function () {
     function WebupRgbPanel(panelTarget, toolsTarget, widthValue, heightValue, endpoint, sendButtonId, clearButtonId) {
       _classCallCheck(this, WebupRgbPanel);
 
